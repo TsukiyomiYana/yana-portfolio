@@ -8,7 +8,6 @@
     user: "TsukiyomiYana",
     repo: "yana-portfolio-assets",
     version: "main",
-    // 用 GitHub Pages 直出圖片（可直接在瀏覽器打開 png）
     pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
   };
 
@@ -21,16 +20,14 @@
     { k: "sketch", l: "Sketch",           dir: "works/sketch" }
   ];
 
+  const EMPTY_TEXT = "No items";
+
   // -------- boot --------
   waitForRoot(async () => {
     ensureMarkup();
-    injectLayoutOverrides();
 
     try {
       const cats = await loadCatsFromRepo();
-      if (!Array.isArray(cats) || !cats.length) {
-        return showError("No categories. Check folders under /works/...");
-      }
       init(cats);
     } catch (e) {
       showError(e && e.message ? e.message : String(e));
@@ -45,17 +42,15 @@
     }, 100);
   }
 
-  // ✅ Tabs 移到作品框外：yana-head（不在 yana-stage 里）
   function ensureMarkup(){
     const root = document.getElementById(ROOT_ID);
     if (!root) return;
-
-    // 如果已經有新版結構就不重建
-    if (root.querySelector(".yana-stage") && root.querySelector(".yana-head")) return;
+    if (root.querySelector(".yana-stage")) return;
 
     root.classList.add("yana-carousel");
     root.innerHTML =
-      '<div class="yana-head" aria-label="Portfolio header">' +
+      // tabs 放在 stage 外面，避免蓋到作品
+      '<div class="yana-head" aria-label="Category header">' +
         '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
       '</div>' +
 
@@ -70,38 +65,6 @@
         '<div class="yana-thumbs" role="tablist" aria-label="Thumbnail list"></div>' +
         '<button class="yana-page yana-page-next" type="button" aria-label="Scroll thumbnails right">►</button>' +
       '</div>';
-  }
-
-  // ✅ 強制 Tabs 不要疊在作品上（覆蓋你原本 CSS 可能的 absolute/overlay）
-  function injectLayoutOverrides(){
-    const id = "yana-tabs-outside-stage-override";
-    if (document.getElementById(id)) return;
-
-    const css = `
-/* Tabs 在作品框外（header 列） */
-#${ROOT_ID}.yana-carousel .yana-head{
-  display:block !important;
-  width:100% !important;
-  margin: 0 0 10px 0 !important;
-}
-#${ROOT_ID}.yana-carousel .yana-tabs{
-  position: static !important;
-  display:flex !important;
-  flex-wrap:wrap !important;
-  gap: 10px !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-}
-
-/* 防止舊 CSS 給 stage 預留 tab 空間/或把 tab 當 overlay */
-#${ROOT_ID}.yana-carousel .yana-stage{
-  padding-top: 0 !important;
-}
-`;
-    const st = document.createElement("style");
-    st.id = id;
-    st.textContent = css;
-    document.head.appendChild(st);
   }
 
   function showError(msg){
@@ -128,16 +91,16 @@
     const data = await res.json();
     const allPaths = flattenJsDelivrFiles((data && data.files) ? data.files : [], "");
 
-    // 只吃媒體檔（避免 .gitkeep / workflow 等雜檔）
+    // 只吃 media，排除 .gitkeep / workflow 等雜檔
     const mediaPaths = allPaths.filter(p => isImagePath(p) || isVideoPath(p));
 
-    // 固定分類：就算資料夾是空的也保留 tab（空的顯示 No items）
+    // ✅ 重點：不要 filter 掉空分類，tabs 要固定顯示
     const cats = FOLDER_CATS.map(c => {
       const prefix = c.dir.replace(/\/+$/,"") + "/";
 
       const items = mediaPaths
         .filter(p => p.startsWith(prefix))
-        // ✅ 新在前：檔名倒序（你命名有補零的話會很好用）
+        // ✅ 新在前（檔名倒序）
         .sort((a,b) => b.localeCompare(a))
         .map(p => pathToItem(p));
 
@@ -178,7 +141,6 @@
     const clean = String(path || "").replace(/^\/+/, "");
     const url = ASSETS.pagesBase.replace(/\/+$/,"/") + clean;
 
-    // thumbnail：先直接用原圖（零額外步驟）
     return {
       t: isVideoPath(clean) ? "video_file" : "image",
       s: url,
@@ -192,7 +154,7 @@
   // -------- carousel --------
   function init(CATS){
     const root  = document.getElementById(ROOT_ID);
-    const tabs  = root.querySelector(".yana-head .yana-tabs");
+    const tabs  = root.querySelector(".yana-tabs");
     const med   = root.querySelector(".yana-media");
     const prev  = root.querySelector(".yana-prev");
     const next  = root.querySelector(".yana-next");
@@ -273,10 +235,10 @@
       const items = curItems();
       stopMedia();
 
-      if (!items.length) {
+      if (!items.length){
         const empty = document.createElement("div");
         empty.className = "yana-empty";
-        empty.textContent = "No items";
+        empty.textContent = EMPTY_TEXT;
         med.appendChild(empty);
         return;
       }
@@ -301,7 +263,6 @@
         v.preload = "metadata";
         frame.appendChild(v);
       } else {
-        // iframe / YouTube embed 等
         const f = document.createElement("iframe");
         f.src = it.s || "";
         f.title = it.ti || "video";
@@ -354,7 +315,6 @@
     function renderThumbs(){
       const items = curItems();
       ths.innerHTML = "";
-
       if (!items.length) return;
 
       items.forEach((it, idx) => {
