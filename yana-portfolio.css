@@ -253,8 +253,8 @@ Put at VERY END of yana-portfolio.css
 /* 2) pseudo-element 畫 SVG（用 mask，顏色 = currentColor） */
 #yana-carousel-portfolio .yana-nav::before{
   content:"";
-  width:18px;
-  height:18px;
+  width:22px;
+  height:22px;
   background:currentColor;
 
   -webkit-mask-repeat:no-repeat;
