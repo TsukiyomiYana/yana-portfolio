@@ -8,13 +8,11 @@
     user: "TsukiyomiYana",
     repo: "yana-portfolio-assets",
     version: "main",
-
-    // 你目前用 GitHub Pages 直出圖片（可直接在瀏覽器打開 png）
+    // 用 GitHub Pages 直出圖片（可直接在瀏覽器打開 png）
     pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
   };
 
-  // ===== 固定分類 = 固定資料夾（你要的效果）=====
-  // 會固定顯示這些 Tab（就算資料夾目前是空的）
+  // ===== 固定分類 = 固定資料夾 =====
   const FOLDER_CATS = [
     { k: "chars",  l: "3D Chars",         dir: "works/chars" },
     { k: "props",  l: "3D Props",         dir: "works/props" },
@@ -26,11 +24,12 @@
   // -------- boot --------
   waitForRoot(async () => {
     ensureMarkup();
+    injectLayoutOverrides();
 
     try {
       const cats = await loadCatsFromRepo();
       if (!Array.isArray(cats) || !cats.length) {
-        return showError("No categories. Check FOLDER_CATS.");
+        return showError("No categories. Check folders under /works/...");
       }
       init(cats);
     } catch (e) {
@@ -46,24 +45,63 @@
     }, 100);
   }
 
+  // ✅ Tabs 移到作品框外：yana-head（不在 yana-stage 里）
   function ensureMarkup(){
     const root = document.getElementById(ROOT_ID);
     if (!root) return;
-    if (root.querySelector(".yana-stage")) return;
+
+    // 如果已經有新版結構就不重建
+    if (root.querySelector(".yana-stage") && root.querySelector(".yana-head")) return;
 
     root.classList.add("yana-carousel");
     root.innerHTML =
-      '<div class="yana-stage" aria-label="Portfolio viewer">' +
+      '<div class="yana-head" aria-label="Portfolio header">' +
         '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
+      '</div>' +
+
+      '<div class="yana-stage" aria-label="Portfolio viewer">' +
         '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">‹</button>' +
         '<div class="yana-media" aria-live="polite"></div>' +
         '<button class="yana-nav yana-next" type="button" aria-label="Next item">›</button>' +
       '</div>' +
+
       '<div class="yana-thumbbar" aria-label="Thumbnails">' +
         '<button class="yana-page yana-page-prev" type="button" aria-label="Scroll thumbnails left">◄</button>' +
         '<div class="yana-thumbs" role="tablist" aria-label="Thumbnail list"></div>' +
         '<button class="yana-page yana-page-next" type="button" aria-label="Scroll thumbnails right">►</button>' +
       '</div>';
+  }
+
+  // ✅ 強制 Tabs 不要疊在作品上（覆蓋你原本 CSS 可能的 absolute/overlay）
+  function injectLayoutOverrides(){
+    const id = "yana-tabs-outside-stage-override";
+    if (document.getElementById(id)) return;
+
+    const css = `
+/* Tabs 在作品框外（header 列） */
+#${ROOT_ID}.yana-carousel .yana-head{
+  display:block !important;
+  width:100% !important;
+  margin: 0 0 10px 0 !important;
+}
+#${ROOT_ID}.yana-carousel .yana-tabs{
+  position: static !important;
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap: 10px !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+}
+
+/* 防止舊 CSS 給 stage 預留 tab 空間/或把 tab 當 overlay */
+#${ROOT_ID}.yana-carousel .yana-stage{
+  padding-top: 0 !important;
+}
+`;
+    const st = document.createElement("style");
+    st.id = id;
+    st.textContent = css;
+    document.head.appendChild(st);
   }
 
   function showError(msg){
@@ -90,16 +128,17 @@
     const data = await res.json();
     const allPaths = flattenJsDelivrFiles((data && data.files) ? data.files : [], "");
 
-    // 只吃你要的檔案類型（避免 .gitkeep / workflow 等雜檔）
+    // 只吃媒體檔（避免 .gitkeep / workflow 等雜檔）
     const mediaPaths = allPaths.filter(p => isImagePath(p) || isVideoPath(p));
 
-    // 固定 tab；每個 tab 的 items：新在前（倒序）
+    // 固定分類：就算資料夾是空的也保留 tab（空的顯示 No items）
     const cats = FOLDER_CATS.map(c => {
       const prefix = c.dir.replace(/\/+$/,"") + "/";
 
       const items = mediaPaths
         .filter(p => p.startsWith(prefix))
-        .sort((a,b) => b.localeCompare(a)) // ✅ 新在前（檔名越新越前）
+        // ✅ 新在前：檔名倒序（你命名有補零的話會很好用）
+        .sort((a,b) => b.localeCompare(a))
         .map(p => pathToItem(p));
 
       return { k: c.k, l: c.l, i: items };
@@ -153,7 +192,7 @@
   // -------- carousel --------
   function init(CATS){
     const root  = document.getElementById(ROOT_ID);
-    const tabs  = root.querySelector(".yana-tabs");
+    const tabs  = root.querySelector(".yana-head .yana-tabs");
     const med   = root.querySelector(".yana-media");
     const prev  = root.querySelector(".yana-prev");
     const next  = root.querySelector(".yana-next");
@@ -234,13 +273,11 @@
       const items = curItems();
       stopMedia();
 
-      // 空分類顯示提示（tab 固定存在）
-      if (!items.length){
+      if (!items.length) {
         const empty = document.createElement("div");
-        empty.className = "yana-frame";
-        empty.textContent = "No items in this category yet.";
+        empty.className = "yana-empty";
+        empty.textContent = "No items";
         med.appendChild(empty);
-        updateNav();
         return;
       }
 
@@ -264,7 +301,7 @@
         v.preload = "metadata";
         frame.appendChild(v);
       } else {
-        // 你原本的 video（iframe / YouTube embed 等）
+        // iframe / YouTube embed 等
         const f = document.createElement("iframe");
         f.src = it.s || "";
         f.title = it.ti || "video";
@@ -312,8 +349,6 @@
 
         med.appendChild(meta);
       }
-
-      updateNav();
     }
 
     function renderThumbs(){
