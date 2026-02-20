@@ -2,17 +2,39 @@
   "use strict";
 
   const ROOT_ID = "yana-carousel-portfolio";
-  const DATA_URL = "https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio@main/yana-portfolio-data.js";
+
+  // ===== Assets repo (放圖片的 repo) =====
+  const ASSETS = {
+    user: "TsukiyomiYana",
+    repo: "yana-portfolio-assets",
+    version: "main",
+
+    // 你目前用 GitHub Pages 直出圖片（可直接在瀏覽器打開 png）
+    pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
+  };
+
+  // ===== 固定分類 = 固定資料夾（你要的效果）=====
+  const FOLDER_CATS = [
+    { k: "chars",  l: "3D Chars",         dir: "works/chars" },
+    { k: "props",  l: "3D Props",         dir: "works/props" },
+    { k: "live2d", l: "Live2D",           dir: "works/live2d" },
+    { k: "game",   l: "Game Development", dir: "works/game" },
+    { k: "sketch", l: "Sketch",           dir: "works/sketch" }
+  ];
 
   // -------- boot --------
-  waitForRoot(() => {
+  waitForRoot(async () => {
     ensureMarkup();
-    loadScript(DATA_URL, () => {
-      const cats = window.YANA_PORTFOLIO_CATS || window.CATS || [];
-      if (!Array.isArray(cats) || !cats.length) return showError("No data. Check data file exports window.YANA_PORTFOLIO_CATS.");
 
+    try {
+      const cats = await loadCatsFromRepo();
+      if (!Array.isArray(cats) || !cats.length) {
+        return showError("No assets found. Check folders under /works/...");
+      }
       init(cats);
-    });
+    } catch (e) {
+      showError(e && e.message ? e.message : String(e));
+    }
   });
 
   function waitForRoot(cb){
@@ -21,14 +43,6 @@
       if (document.getElementById(ROOT_ID)) { clearInterval(t); cb(); }
       else if (++n > 120) { clearInterval(t); console.error("[YANA] root not found"); }
     }, 100);
-  }
-
-  function loadScript(src, onload){
-    const s = document.createElement("script");
-    s.src = src; s.async = true;
-    s.onload = onload;
-    s.onerror = () => showError("Failed to load data script. Check DATA_URL.");
-    document.head.appendChild(s);
   }
 
   function ensureMarkup(){
@@ -58,6 +72,80 @@
     if (!med) return;
     med.textContent = msg;
     console.error("[YANA]", msg);
+  }
+
+  // ===== Auto-load cats by listing repo files (jsDelivr Data API) =====
+  async function loadCatsFromRepo(){
+    const api =
+      "https://data.jsdelivr.com/v1/packages/gh/" +
+      encodeURIComponent(ASSETS.user) + "/" +
+      encodeURIComponent(ASSETS.repo) + "@" +
+      encodeURIComponent(ASSETS.version) +
+      "?structure=tree";
+
+    const res = await fetch(api, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Failed to fetch file list (${res.status})`);
+
+    const data = await res.json();
+    const allPaths = flattenJsDelivrFiles((data && data.files) ? data.files : [], "");
+
+    // 只吃你要的檔案類型（避免 .gitkeep / workflow 等雜檔）
+    const mediaPaths = allPaths.filter(p => isImagePath(p) || isVideoPath(p));
+
+    const cats = FOLDER_CATS.map(c => {
+      const prefix = c.dir.replace(/\/+$/,"") + "/";
+
+      const items = mediaPaths
+        .filter(p => p.startsWith(prefix))
+        .sort((a,b) => a.localeCompare(b))
+        .map(p => pathToItem(p));
+
+      return { k: c.k, l: c.l, i: items };
+    }).filter(c => c.i.length);
+
+    return cats;
+  }
+
+  function flattenJsDelivrFiles(files, prefix){
+    const out = [];
+    for (const f of files) {
+      const name = (f && typeof f.name === "string") ? f.name : "";
+      if (!name) continue;
+
+      const path = prefix ? (prefix + name) : name;
+
+      if (Array.isArray(f.files) && f.files.length) {
+        out.push(...flattenJsDelivrFiles(f.files, path.replace(/\/+$/,"") + "/"));
+      } else {
+        out.push(path);
+      }
+    }
+    return out;
+  }
+
+  function isImagePath(p){
+    const x = String(p).toLowerCase();
+    return x.endsWith(".png") || x.endsWith(".jpg") || x.endsWith(".jpeg") || x.endsWith(".webp");
+  }
+
+  function isVideoPath(p){
+    const x = String(p).toLowerCase();
+    return x.endsWith(".mp4") || x.endsWith(".webm");
+  }
+
+  function pathToItem(path){
+    const clean = String(path || "").replace(/^\/+/, "");
+    const url = ASSETS.pagesBase.replace(/\/+$/,"/") + clean;
+
+    // thumbnail：先直接用原圖（零額外步驟）
+    return {
+      t: isVideoPath(clean) ? "video_file" : "image",
+      s: url,
+      th: isVideoPath(clean) ? "" : url,
+      ti: "",
+      d: "",
+      links: []
+    };
   }
 
   // -------- carousel --------
@@ -133,6 +221,10 @@
     function stopMedia(){
       const ifs = med.querySelectorAll("iframe");
       ifs.forEach(f => { try { f.src = "about:blank"; } catch(e){} });
+
+      const vids = med.querySelectorAll("video");
+      vids.forEach(v => { try { v.pause(); v.removeAttribute("src"); v.load(); } catch(e){} });
+
       med.innerHTML = "";
     }
 
@@ -153,7 +245,15 @@
         im.alt = it.ti || "";
         im.loading = "lazy";
         frame.appendChild(im);
+      } else if (it.t === "video_file") {
+        const v = document.createElement("video");
+        v.src = it.s || "";
+        v.controls = true;
+        v.playsInline = true;
+        v.preload = "metadata";
+        frame.appendChild(v);
       } else {
+        // 你原本的 video（iframe / YouTube embed 等）
         const f = document.createElement("iframe");
         f.src = it.s || "";
         f.title = it.ti || "video";
@@ -225,7 +325,6 @@
           im.draggable = false;
           b.appendChild(im);
         } else {
-          // fallback (e.g., video without thumbnail)
           const d = document.createElement("div");
           d.className = "tcard";
           d.textContent = String(it.ti || "Item").slice(0, 24);
