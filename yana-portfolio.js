@@ -40,9 +40,9 @@
     root.innerHTML =
       '<div class="yana-stage" aria-label="Portfolio viewer">' +
         '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
-        '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">◄</button>' +
+        '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">‹</button>' +
         '<div class="yana-media" aria-live="polite"></div>' +
-        '<button class="yana-nav yana-next" type="button" aria-label="Next item">►</button>' +
+        '<button class="yana-nav yana-next" type="button" aria-label="Next item">›</button>' +
       '</div>' +
       '<div class="yana-thumbbar" aria-label="Thumbnails">' +
         '<button class="yana-page yana-page-prev" type="button" aria-label="Scroll thumbnails left">◄</button>' +
