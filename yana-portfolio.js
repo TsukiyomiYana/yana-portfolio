@@ -3,7 +3,6 @@
 
   const ROOT_ID = "yana-carousel-portfolio";
 
-  // ===== Assets repo (放圖片的 repo) =====
   const ASSETS = {
     user: "TsukiyomiYana",
     repo: "yana-portfolio-assets",
@@ -11,7 +10,6 @@
     pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
   };
 
-  // ===== 固定分類 = 固定資料夾（Tab 永遠顯示）=====
   const FOLDER_CATS = [
     { k: "chars",  l: "3D Chars",         dir: "works/chars" },
     { k: "props",  l: "3D Props",         dir: "works/props" },
@@ -25,7 +23,7 @@
   // -------- boot --------
   waitForRoot(async () => {
     ensureMarkup();
-    injectLayoutOverrides();
+    injectHardLayoutOverrides();
 
     try {
       const cats = await loadCatsFromRepo();
@@ -43,11 +41,13 @@
     }, 100);
   }
 
-  // ✅ tabs 變成「作品框內上方一列」：在 stage 裡，但不覆蓋圖片
+  // ✅ 這個結構保證 tabs 在「作品上方一列」，不會疊在圖片上
   function ensureMarkup(){
     const root = document.getElementById(ROOT_ID);
     if (!root) return;
-    if (root.querySelector(".yana-stage")) return;
+
+    // 已經是新結構就不重建（避免重複綁事件）
+    if (root.querySelector(".yana-head") && root.querySelector(".yana-body")) return;
 
     root.classList.add("yana-carousel");
     root.innerHTML =
@@ -68,16 +68,19 @@
       '</div>';
   }
 
-  // ✅ 強制關掉「tabs overlay」類型的 CSS（用 !important 壓掉）
-  function injectLayoutOverrides(){
-    const id = "yana-tabs-header-row-override";
+  // ✅ 強制把 tabs 從 overlay 模式拉回「正常排版流」
+  function injectHardLayoutOverrides(){
+    const id = "yana-hard-layout-v1";
     if (document.getElementById(id)) return;
 
     const css = `
+/* 讓 stage 變成上下兩列：head( tabs ) + body( media ) */
 #${ROOT_ID}.yana-carousel .yana-stage{
   display:flex !important;
   flex-direction:column !important;
 }
+
+/* tabs 標題列：一定是正常 flow，不准 absolute */
 #${ROOT_ID}.yana-carousel .yana-head{
   position:relative !important;
   display:block !important;
@@ -85,16 +88,25 @@
   z-index: 5 !important;
 }
 #${ROOT_ID}.yana-carousel .yana-tabs{
-  position:static !important;      /* 這行最關鍵：打掉 absolute 疊圖 */
+  position:static !important;      /* <- 最關鍵：打掉 absolute 疊圖 */
   inset:auto !important;
   display:flex !important;
   flex-wrap:wrap !important;
-  gap:10px !important;
+  gap: 10px !important;
+  align-items:center !important;
   justify-content:flex-start !important;
 }
+
+/* body 用 grid 排版：左箭頭 / 作品 / 右箭頭 */
 #${ROOT_ID}.yana-carousel .yana-body{
-  position:relative !important;
-  display:block !important;
+  display:grid !important;
+  grid-template-columns: 56px 1fr 56px !important;
+  align-items:center !important;
+  gap: 0 !important;
+  padding: 0 12px 12px 12px !important;
+}
+#${ROOT_ID}.yana-carousel .yana-media{
+  min-height:0 !important;
 }
 `;
     const st = document.createElement("style");
@@ -129,18 +141,15 @@
 
     const mediaPaths = allPaths.filter(p => isImagePath(p) || isVideoPath(p));
 
-    // ✅ 不 filter 空分類：tabs 永遠顯示
-    const cats = FOLDER_CATS.map(c => {
+    // ✅ tabs 永遠顯示：不 filter 空分類
+    return FOLDER_CATS.map(c => {
       const prefix = c.dir.replace(/\/+$/,"") + "/";
       const items = mediaPaths
         .filter(p => p.startsWith(prefix))
         .sort((a,b) => b.localeCompare(a)) // ✅ 新在前（檔名倒序）
         .map(p => pathToItem(p));
-
       return { k: c.k, l: c.l, i: items };
     });
-
-    return cats;
   }
 
   function flattenJsDelivrFiles(files, prefix){
@@ -164,7 +173,6 @@
     const x = String(p).toLowerCase();
     return x.endsWith(".png") || x.endsWith(".jpg") || x.endsWith(".jpeg") || x.endsWith(".webp");
   }
-
   function isVideoPath(p){
     const x = String(p).toLowerCase();
     return x.endsWith(".mp4") || x.endsWith(".webm");
