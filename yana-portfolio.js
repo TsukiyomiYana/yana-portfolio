@@ -11,7 +11,7 @@
     pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
   };
 
-  // ===== 固定分類 = 固定資料夾 =====
+  // ===== 固定分類 = 固定資料夾（Tab 永遠顯示）=====
   const FOLDER_CATS = [
     { k: "chars",  l: "3D Chars",         dir: "works/chars" },
     { k: "props",  l: "3D Props",         dir: "works/props" },
@@ -25,6 +25,7 @@
   // -------- boot --------
   waitForRoot(async () => {
     ensureMarkup();
+    injectLayoutOverrides();
 
     try {
       const cats = await loadCatsFromRepo();
@@ -42,6 +43,7 @@
     }, 100);
   }
 
+  // ✅ tabs 變成「作品框內上方一列」：在 stage 裡，但不覆蓋圖片
   function ensureMarkup(){
     const root = document.getElementById(ROOT_ID);
     if (!root) return;
@@ -49,22 +51,56 @@
 
     root.classList.add("yana-carousel");
     root.innerHTML =
-      // tabs 放在 stage 外面，避免蓋到作品
-      '<div class="yana-head" aria-label="Category header">' +
-        '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
-      '</div>' +
-
       '<div class="yana-stage" aria-label="Portfolio viewer">' +
-        '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">‹</button>' +
-        '<div class="yana-media" aria-live="polite"></div>' +
-        '<button class="yana-nav yana-next" type="button" aria-label="Next item">›</button>' +
+        '<div class="yana-head" aria-label="Category header">' +
+          '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
+        '</div>' +
+        '<div class="yana-body">' +
+          '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">‹</button>' +
+          '<div class="yana-media" aria-live="polite"></div>' +
+          '<button class="yana-nav yana-next" type="button" aria-label="Next item">›</button>' +
+        '</div>' +
       '</div>' +
-
       '<div class="yana-thumbbar" aria-label="Thumbnails">' +
         '<button class="yana-page yana-page-prev" type="button" aria-label="Scroll thumbnails left">◄</button>' +
         '<div class="yana-thumbs" role="tablist" aria-label="Thumbnail list"></div>' +
         '<button class="yana-page yana-page-next" type="button" aria-label="Scroll thumbnails right">►</button>' +
       '</div>';
+  }
+
+  // ✅ 強制關掉「tabs overlay」類型的 CSS（用 !important 壓掉）
+  function injectLayoutOverrides(){
+    const id = "yana-tabs-header-row-override";
+    if (document.getElementById(id)) return;
+
+    const css = `
+#${ROOT_ID}.yana-carousel .yana-stage{
+  display:flex !important;
+  flex-direction:column !important;
+}
+#${ROOT_ID}.yana-carousel .yana-head{
+  position:relative !important;
+  display:block !important;
+  padding: 12px 12px 8px 12px !important;
+  z-index: 5 !important;
+}
+#${ROOT_ID}.yana-carousel .yana-tabs{
+  position:static !important;      /* 這行最關鍵：打掉 absolute 疊圖 */
+  inset:auto !important;
+  display:flex !important;
+  flex-wrap:wrap !important;
+  gap:10px !important;
+  justify-content:flex-start !important;
+}
+#${ROOT_ID}.yana-carousel .yana-body{
+  position:relative !important;
+  display:block !important;
+}
+`;
+    const st = document.createElement("style");
+    st.id = id;
+    st.textContent = css;
+    document.head.appendChild(st);
   }
 
   function showError(msg){
@@ -91,17 +127,14 @@
     const data = await res.json();
     const allPaths = flattenJsDelivrFiles((data && data.files) ? data.files : [], "");
 
-    // 只吃 media，排除 .gitkeep / workflow 等雜檔
     const mediaPaths = allPaths.filter(p => isImagePath(p) || isVideoPath(p));
 
-    // ✅ 重點：不要 filter 掉空分類，tabs 要固定顯示
+    // ✅ 不 filter 空分類：tabs 永遠顯示
     const cats = FOLDER_CATS.map(c => {
       const prefix = c.dir.replace(/\/+$/,"") + "/";
-
       const items = mediaPaths
         .filter(p => p.startsWith(prefix))
-        // ✅ 新在前（檔名倒序）
-        .sort((a,b) => b.localeCompare(a))
+        .sort((a,b) => b.localeCompare(a)) // ✅ 新在前（檔名倒序）
         .map(p => pathToItem(p));
 
       return { k: c.k, l: c.l, i: items };
@@ -116,12 +149,12 @@
       const name = (f && typeof f.name === "string") ? f.name : "";
       if (!name) continue;
 
-      const path = prefix ? (prefix + name) : name;
+      const p = prefix ? (prefix + name) : name;
 
       if (Array.isArray(f.files) && f.files.length) {
-        out.push(...flattenJsDelivrFiles(f.files, path.replace(/\/+$/,"") + "/"));
+        out.push(...flattenJsDelivrFiles(f.files, p.replace(/\/+$/,"") + "/"));
       } else {
-        out.push(path);
+        out.push(p);
       }
     }
     return out;
@@ -162,8 +195,8 @@
     const lbtn  = root.querySelector(".yana-page-prev");
     const rbtn  = root.querySelector(".yana-page-next");
 
-    let ci = 0;  // category index
-    let ii = 0;  // item index
+    let ci = 0;
+    let ii = 0;
 
     prev.addEventListener("click", () => step(-1));
     next.addEventListener("click", () => step( 1));
@@ -240,6 +273,7 @@
         empty.className = "yana-empty";
         empty.textContent = EMPTY_TEXT;
         med.appendChild(empty);
+        updateNav();
         return;
       }
 
@@ -272,44 +306,7 @@
       }
 
       med.appendChild(frame);
-
-      const hasDesc  = !!(it.d && String(it.d).trim());
-      const hasLinks = Array.isArray(it.links) && it.links.length;
-
-      if (it.ti || hasDesc || hasLinks){
-        const meta = document.createElement("div");
-        meta.className = "yana-meta";
-
-        if (it.ti){
-          const t = document.createElement("div");
-          t.className = "t";
-          t.textContent = it.ti;
-          meta.appendChild(t);
-        }
-
-        if (hasDesc){
-          const d = document.createElement("div");
-          d.className = "d";
-          d.textContent = it.d;
-          meta.appendChild(d);
-        }
-
-        if (hasLinks){
-          const links = document.createElement("div");
-          links.className = "yana-links";
-          it.links.forEach(L => {
-            const a = document.createElement("a");
-            a.href = L.url || "#";
-            a.textContent = String(L.label || "Link").toUpperCase();
-            a.target = "_blank";
-            a.rel = "noopener noreferrer";
-            links.appendChild(a);
-          });
-          meta.appendChild(links);
-        }
-
-        med.appendChild(meta);
-      }
+      updateNav();
     }
 
     function renderThumbs(){
@@ -323,20 +320,18 @@
         b.className = "yana-thumb";
         b.setAttribute("role","tab");
         b.setAttribute("aria-selected", idx === ii ? "true" : "false");
-        b.title = it.ti || "";
 
         const src = it.th || (it.t === "image" ? it.s : "");
         if (src){
           const im = document.createElement("img");
           im.src = src;
-          im.alt = it.ti || "";
           im.loading = "lazy";
           im.draggable = false;
           b.appendChild(im);
         } else {
           const d = document.createElement("div");
           d.className = "tcard";
-          d.textContent = String(it.ti || "Item").slice(0, 24);
+          d.textContent = "Item";
           b.appendChild(d);
         }
 
