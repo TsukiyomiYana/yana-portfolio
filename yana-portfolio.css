@@ -235,16 +235,14 @@
   #yana-carousel-portfolio .yana-thumbs{ padding:2px 10px; }
 }
 
-/* Inline SVG arrows: perfect centering + size control */
 #yana-carousel-portfolio .yana-nav{
   display:flex;
   align-items:center;
   justify-content:center;
 }
 
-/* ✅ 只改這裡就能變大/變小 */
 #yana-carousel-portfolio .yana-nav .yana-ico{
-  width:24px;
-  height:24px;
+  width:32px;   /* ✅ 先用 32px，保證你肉眼看得出變化 */
+  height:32px;
   display:block;
 }
