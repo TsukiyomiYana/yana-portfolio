@@ -10,7 +10,6 @@
     loadScript(DATA_URL, () => {
       const cats = window.YANA_PORTFOLIO_CATS || window.CATS || [];
       if (!Array.isArray(cats) || !cats.length) return showError("No data. Check data file exports window.YANA_PORTFOLIO_CATS.");
-
       init(cats);
     });
   });
@@ -73,6 +72,53 @@
 
     let ci = 0;  // category index
     let ii = 0;  // item index
+
+    /* =========================
+       Lightbox (image only)
+    ========================= */
+    let lb = null;
+
+    function openLightbox(src, alt){
+      if (!src) return;
+
+      if (!lb){
+        lb = document.createElement("div");
+        lb.className = "yana-lightbox";
+        lb.innerHTML =
+          '<div class="yana-lightbox-backdrop"></div>' +
+          '<img class="yana-lightbox-img" alt="">' +
+          '<button class="yana-lightbox-close" type="button" aria-label="Close">×</button>';
+
+        document.body.appendChild(lb);
+
+        lb.addEventListener("click", (e) => {
+          const t = e.target;
+          const isBackdrop = t.classList.contains("yana-lightbox-backdrop");
+          const isImg = t.classList.contains("yana-lightbox-img");
+          const isClose = t.classList.contains("yana-lightbox-close");
+          if (isBackdrop || isImg || isClose) closeLightbox();
+        });
+
+        window.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") closeLightbox();
+        });
+      }
+
+      const img = lb.querySelector(".yana-lightbox-img");
+      img.src = src;
+      img.alt = alt || "";
+      lb.classList.add("is-open");
+    }
+
+    function closeLightbox(){
+      if (!lb) return;
+      lb.classList.remove("is-open");
+      const img = lb.querySelector(".yana-lightbox-img");
+      // cleanup：避免一直占記憶體
+      setTimeout(() => { if (img) img.src = ""; }, 150);
+    }
+
+    /* ========================= */
 
     prev.addEventListener("click", () => step(-1));
     next.addEventListener("click", () => step( 1));
@@ -152,6 +198,8 @@
         im.src = it.s || "";
         im.alt = it.ti || "";
         im.loading = "lazy";
+        im.style.cursor = "zoom-in";
+        im.addEventListener("click", () => openLightbox(it.s || "", it.ti || ""));
         frame.appendChild(im);
       } else {
         const f = document.createElement("iframe");
