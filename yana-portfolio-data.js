@@ -1,22 +1,23 @@
 /* =========================================================
-  Yana Portfolio Data (Global)
-  - IMPORTANT: Must attach to window so Carrd embed can read it.
-  - Format:
+  Yana 作品集資料（Global）
+  - IMPORTANT：必須掛在 window 底下，Carrd 的 Embed 才能讀得到。
+  - 格式：
     window.YANA_PORTFOLIO_CATS = [
       { k:"chars", l:"3D Chars", i:[ {t,ti,s,th, ...optional...}, ... ] },
       ...
     ]
 
-  Item fields:
-  - t  : "image" | "youtube" | "vimeo"
-  - ti : title (string)
-  - s  : src (image = image URL; youtube = embed URL; vimeo = player URL)
-  - th : thumbnail URL (optional; fallback to s)
+  Item 欄位說明：
+  - t  ："image" | "youtube" | "vimeo"
+  - ti ：title (string)
+  - s  ：src (image = image URL; youtube = embed URL; vimeo = player URL)
+  - th ：thumbnail URL (optional; fallback to s)
 
-  Optional (used for overlay info, especially Game Dev):
-  - d     : description text
-  - links : [{ label:"ITCH.IO", url:"https://..." }, ...]
+  Game Dev欄位：
+  - d     ：描述文字
+  - links ：[{ label:"ITCH.IO", url:"https://..." }, ...]
 ========================================================= */
+
 
 window.YANA_PORTFOLIO_CATS = [
   /* =========================
