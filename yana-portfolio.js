@@ -1,23 +1,17 @@
 (() => {
   "use strict";
 
-  const YANA_VER = "20260219-ARROWPATCH-01";
   const ROOT_ID = "yana-carousel-portfolio";
   const DATA_URL = "https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio@main/yana-portfolio-data.js";
 
   // -------- boot --------
   waitForRoot(() => {
-    const root = document.getElementById(ROOT_ID);
-    if (root) root.dataset.yanaVer = YANA_VER;
-
-    ensureMarkupOrPatchArrows(); // ✅ 即使已存在 .yana-stage 也會 patch 箭頭
+    ensureMarkup();
     loadScript(DATA_URL, () => {
       const cats = window.YANA_PORTFOLIO_CATS || window.CATS || [];
-      if (!Array.isArray(cats) || !cats.length) {
-        return showError("No data. Check data file exports window.YANA_PORTFOLIO_CATS.");
-      }
+      if (!Array.isArray(cats) || !cats.length) return showError("No data. Check data file exports window.YANA_PORTFOLIO_CATS.");
+
       init(cats);
-      console.log("[YANA] loaded", YANA_VER);
     });
   });
 
@@ -37,48 +31,24 @@
     document.head.appendChild(s);
   }
 
-  function svgPrev(){
-    return (
-      '<svg class="yana-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-        '<path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>' +
-      '</svg>'
-    );
-  }
-  function svgNext(){
-    return (
-      '<svg class="yana-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
-        '<path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>' +
-      '</svg>'
-    );
-  }
-
-  function ensureMarkupOrPatchArrows(){
+  function ensureMarkup(){
     const root = document.getElementById(ROOT_ID);
     if (!root) return;
+    if (root.querySelector(".yana-stage")) return;
 
-    // 如果還沒建立 stage，就建立「含 SVG」的完整 markup
-    if (!root.querySelector(".yana-stage")){
-      root.classList.add("yana-carousel");
-      root.innerHTML =
-        '<div class="yana-stage" aria-label="Portfolio viewer">' +
-          '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
-          '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">' + svgPrev() + '</button>' +
-          '<div class="yana-media" aria-live="polite"></div>' +
-          '<button class="yana-nav yana-next" type="button" aria-label="Next item">' + svgNext() + '</button>' +
-        '</div>' +
-        '<div class="yana-thumbbar" aria-label="Thumbnails">' +
-          '<button class="yana-page yana-page-prev" type="button" aria-label="Scroll thumbnails left">◄</button>' +
-          '<div class="yana-thumbs" role="tablist" aria-label="Thumbnail list"></div>' +
-          '<button class="yana-page yana-page-next" type="button" aria-label="Scroll thumbnails right">►</button>' +
-        '</div>';
-      return;
-    }
-
-    // ✅ 如果已經有 stage（舊版可能有 ‹ ›），也強制 patch 成 SVG
-    const p = root.querySelector(".yana-prev");
-    const n = root.querySelector(".yana-next");
-    if (p && !p.querySelector(".yana-ico")) p.innerHTML = svgPrev();
-    if (n && !n.querySelector(".yana-ico")) n.innerHTML = svgNext();
+    root.classList.add("yana-carousel");
+    root.innerHTML =
+      '<div class="yana-stage" aria-label="Portfolio viewer">' +
+        '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
+        '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">‹</button>' +
+        '<div class="yana-media" aria-live="polite"></div>' +
+        '<button class="yana-nav yana-next" type="button" aria-label="Next item">›</button>' +
+      '</div>' +
+      '<div class="yana-thumbbar" aria-label="Thumbnails">' +
+        '<button class="yana-page yana-page-prev" type="button" aria-label="Scroll thumbnails left">◄</button>' +
+        '<div class="yana-thumbs" role="tablist" aria-label="Thumbnail list"></div>' +
+        '<button class="yana-page yana-page-next" type="button" aria-label="Scroll thumbnails right">►</button>' +
+      '</div>';
   }
 
   function showError(msg){
@@ -101,8 +71,8 @@
     const lbtn  = root.querySelector(".yana-page-prev");
     const rbtn  = root.querySelector(".yana-page-next");
 
-    let ci = 0;
-    let ii = 0;
+    let ci = 0;  // category index
+    let ii = 0;  // item index
 
     prev.addEventListener("click", () => step(-1));
     next.addEventListener("click", () => step( 1));
@@ -255,6 +225,7 @@
           im.draggable = false;
           b.appendChild(im);
         } else {
+          // fallback (e.g., video without thumbnail)
           const d = document.createElement("div");
           d.className = "tcard";
           d.textContent = String(it.ti || "Item").slice(0, 24);
