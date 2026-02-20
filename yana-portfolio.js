@@ -2,12 +2,12 @@
   "use strict";
 
   // =========================================================
-  //  YANA Portfolio (Carrd Embed)
-  //  - Auto list assets via jsDelivr Data API (tree)
-  //  - Fixed category folders
-  //  - Tabs are OUTSIDE the image frame (no overlay)
-  //  - Sort: pin (-p00-) first, then NEW FIRST (filename desc)
-  //  - Empty categories still show with "No items"
+  // YANA Portfolio (Carrd Embed)
+  // - Auto list assets via jsDelivr Data API (tree)
+  // - Fixed category folders (always show)
+  // - Tabs are OUTSIDE the portfolio box (no overlay)
+  // - Sort: pin (-p00-) first, then NEW FIRST (filename desc)
+  // - Image fallback: GitHub Pages -> jsDelivr file CDN
   // =========================================================
 
   const ROOT_ID = "yana-carousel-portfolio";
@@ -17,10 +17,15 @@
     user: "TsukiyomiYana",
     repo: "yana-portfolio-assets",
     version: "main",
-    pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
+
+    // primary image base
+    pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/",
+
+    // fallback image base (direct file CDN)
+    cdnBase: "https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@main/"
   };
 
-  // ===== 固定分類 = 固定資料夾 =====
+  // ===== 固定分類 = 固定資料夾（永遠顯示）=====
   const FOLDER_CATS = [
     { k: "chars",  l: "3D Chars",         dir: "works/chars" },
     { k: "props",  l: "3D Props",         dir: "works/props" },
@@ -30,7 +35,7 @@
   ];
 
   // ===== 可手動置頂命名：在檔名裡放 -p00- / -p01- ... =====
-  // 數字越小越前。沒放 p 就視為 9999，照「新在前」排。
+  // 數字越小越前；沒放 p 視為 9999，照「新在前」排
   function getPinOrderFromName(path) {
     const name = String(path || "").split("/").pop() || "";
     const m = name.match(/-p(\d{1,3})-/i);
@@ -43,6 +48,7 @@
   waitForRoot(async () => {
     ensureMarkup();
     injectCssPatch();
+    normalizeBoxStyles();
 
     try {
       const cats = await loadCatsFromRepo();
@@ -60,70 +66,92 @@
     }, 100);
   }
 
-  // ===== 重要：這裡把 Tabs 放到「作品框外」(head) =====
+  // ===== Markup: Tabs OUTSIDE the grey portfolio box =====
   function ensureMarkup() {
     const root = document.getElementById(ROOT_ID);
     if (!root) return;
-    if (root.querySelector(".yana-stage")) return;
+    if (root.querySelector(".yana-box")) return;
 
     root.classList.add("yana-carousel");
+
+    // Tabs row (outside box)
+    // Box (stage + thumbs) is the portfolio frame
     root.innerHTML =
-      // Tabs/header row (outside frame)
-      '<div class="yana-head" aria-label="Portfolio categories">' +
+      '<div class="yana-head-out" aria-label="Portfolio categories">' +
         '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
       '</div>' +
-
-      // Stage/frame row (image/video only)
-      '<div class="yana-stage" aria-label="Portfolio viewer">' +
-        '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">‹</button>' +
-        '<div class="yana-media" aria-live="polite"></div>' +
-        '<button class="yana-nav yana-next" type="button" aria-label="Next item">›</button>' +
-      '</div>' +
-
-      // Thumbs row
-      '<div class="yana-thumbbar" aria-label="Thumbnails">' +
-        '<button class="yana-page yana-page-prev" type="button" aria-label="Scroll thumbnails left">◄</button>' +
-        '<div class="yana-thumbs" role="tablist" aria-label="Thumbnail list"></div>' +
-        '<button class="yana-page yana-page-next" type="button" aria-label="Scroll thumbnails right">►</button>' +
+      '<div class="yana-box">' +
+        '<div class="yana-stage" aria-label="Portfolio viewer">' +
+          '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">‹</button>' +
+          '<div class="yana-media" aria-live="polite"></div>' +
+          '<button class="yana-nav yana-next" type="button" aria-label="Next item">›</button>' +
+        '</div>' +
+        '<div class="yana-thumbbar" aria-label="Thumbnails">' +
+          '<button class="yana-page yana-page-prev" type="button" aria-label="Scroll thumbnails left">◄</button>' +
+          '<div class="yana-thumbs" role="tablist" aria-label="Thumbnail list"></div>' +
+          '<button class="yana-page yana-page-next" type="button" aria-label="Scroll thumbnails right">►</button>' +
+        '</div>' +
       '</div>';
   }
 
-  // ===== 如果你原本 CSS 把 tabs 設成 absolute 疊在圖上，這裡強制改回正常流 =====
+  // ===== CSS patch: force tabs to be normal flow above the box =====
   function injectCssPatch() {
-    const id = "yana-css-patch-tabs-outside";
+    const id = "yana-css-patch-tabs-outside-v2";
     if (document.getElementById(id)) return;
 
     const css =
-      `#${ROOT_ID} .yana-head{` +
-        `display:flex !important;` +
-        `align-items:center !important;` +
-        `gap:10px !important;` +
+      `#${ROOT_ID}{background:transparent !important; box-shadow:none !important; border:0 !important; padding:0 !important;}` +
+
+      `#${ROOT_ID} .yana-head-out{` +
+        `display:flex !important; align-items:center !important; gap:10px !important;` +
         `margin:0 0 10px 0 !important;` +
-        `position:relative !important;` +
-        `z-index:1 !important;` +
+        `position:relative !important; z-index:50 !important;` +
       `}` +
-      `#${ROOT_ID} .yana-tabs{` +
-        `position:static !important;` +
-        `inset:auto !important;` +
-        `top:auto !important; left:auto !important; right:auto !important; bottom:auto !important;` +
-        `transform:none !important;` +
-        `z-index:1 !important;` +
+
+      // make sure tabs never become absolute/overlay
+      `#${ROOT_ID} .yana-head-out .yana-tabs{` +
+        `position:static !important; inset:auto !important; transform:none !important;` +
+        `z-index:50 !important;` +
       `}` +
-      // 避免任何 padding/top 讓圖被擠怪
-      `#${ROOT_ID} .yana-stage{` +
-        `padding-top:0 !important;` +
-      `}` +
-      // Empty state
-      `#${ROOT_ID} .yana-empty{` +
-        `padding:24px 16px !important;` +
-        `opacity:0.8 !important;` +
-        `text-align:center !important;` +
-      `}`;
+
+      // portfolio frame container
+      `#${ROOT_ID} .yana-box{position:relative !important;}` +
+
+      // empty state
+      `#${ROOT_ID} .yana-empty{padding:24px 16px !important; opacity:0.85 !important; text-align:center !important;}`;
 
     const style = document.createElement("style");
     style.id = id;
     style.textContent = css;
     document.head.appendChild(style);
+  }
+
+  // Copy the old root "box" look (bg/padding/radius/shadow) onto .yana-box if needed
+  function normalizeBoxStyles() {
+    const root = document.getElementById(ROOT_ID);
+    if (!root) return;
+    const box = root.querySelector(".yana-box");
+    if (!box) return;
+
+    const cs = getComputedStyle(root);
+    const isTransparentBg =
+      (cs.backgroundColor === "rgba(0, 0, 0, 0)" || cs.backgroundColor === "transparent") &&
+      (cs.backgroundImage === "none");
+
+    // If root had styling (older CSS), preserve it onto box
+    // Even if transparent, this won't break anything.
+    box.style.backgroundImage = cs.backgroundImage;
+    box.style.backgroundColor = isTransparentBg ? "" : cs.backgroundColor;
+    box.style.boxShadow = cs.boxShadow;
+    box.style.border = cs.border;
+    box.style.borderRadius = cs.borderRadius;
+    box.style.padding = cs.padding;
+
+    // Root should be clean (tabs sit outside)
+    root.style.background = "transparent";
+    root.style.boxShadow = "none";
+    root.style.border = "0";
+    root.style.padding = "0";
   }
 
   function showError(msg) {
@@ -150,23 +178,20 @@
     const data = await res.json();
     const allPaths = flattenJsDelivrFiles((data && data.files) ? data.files : [], "");
 
-    // only media files
     const mediaPaths = allPaths.filter(p => isImagePath(p) || isVideoPath(p));
 
-    // 產生固定 5 類（就算空也要）
+    // Fixed categories; even empty should exist
     const cats = FOLDER_CATS.map(c => {
       const prefix = c.dir.replace(/\/+$/, "") + "/";
 
       const items = mediaPaths
         .filter(p => p.startsWith(prefix))
         .sort((a, b) => {
-          // 1) pin order
           const pa = getPinOrderFromName(a);
           const pb = getPinOrderFromName(b);
           if (pa !== pb) return pa - pb;
 
-          // 2) NEW FIRST: filename desc
-          // numeric:true 讓 -s10- > -s2- 這種排序更直覺
+          // NEW FIRST: filename desc (numeric-aware)
           return b.localeCompare(a, undefined, { numeric: true, sensitivity: "base" });
         })
         .map(p => pathToItem(p));
@@ -204,14 +229,22 @@
     return x.endsWith(".mp4") || x.endsWith(".webm");
   }
 
+  function joinBase(base, path) {
+    return String(base || "").replace(/\/+$/, "/") + String(path || "").replace(/^\/+/, "");
+  }
+
   function pathToItem(path) {
     const clean = String(path || "").replace(/^\/+/, "");
-    const url = ASSETS.pagesBase.replace(/\/+$/, "/") + clean;
+
+    const urlPrimary = joinBase(ASSETS.pagesBase, clean);
+    const urlFallback = joinBase(ASSETS.cdnBase, clean);
 
     return {
       t: isVideoPath(clean) ? "video_file" : "image",
-      s: url,
-      th: isVideoPath(clean) ? "" : url,
+      s: urlPrimary,      // primary
+      s2: urlFallback,    // fallback
+      th: isVideoPath(clean) ? "" : urlPrimary,
+      th2: isVideoPath(clean) ? "" : urlFallback,
       ti: "",
       d: "",
       links: []
@@ -306,6 +339,18 @@
       stopMedia();
       med.innerHTML = '<div class="yana-empty">No items</div>';
       ths.innerHTML = "";
+      prev.disabled = true;
+      next.disabled = true;
+    }
+
+    function setImgWithFallback(img, primary, fallback){
+      img.src = primary || "";
+      img.onerror = () => {
+        if (!fallback) return;
+        if (img.dataset._fallbackApplied === "1") return;
+        img.dataset._fallbackApplied = "1";
+        img.src = fallback;
+      };
     }
 
     function renderMedia(){
@@ -321,16 +366,16 @@
 
       if (it.t === "image"){
         const im = document.createElement("img");
-        im.src = it.s || "";
         im.alt = it.ti || "";
         im.loading = "lazy";
+        setImgWithFallback(im, it.s || "", it.s2 || "");
         frame.appendChild(im);
       } else if (it.t === "video_file") {
         const v = document.createElement("video");
-        v.src = it.s || "";
         v.controls = true;
         v.playsInline = true;
         v.preload = "metadata";
+        v.src = it.s || it.s2 || "";
         frame.appendChild(v);
       } else {
         const f = document.createElement("iframe");
@@ -380,6 +425,8 @@
 
         med.appendChild(meta);
       }
+
+      updateNav();
     }
 
     function renderThumbs(){
@@ -395,13 +442,15 @@
         b.setAttribute("aria-selected", idx === ii ? "true" : "false");
         b.title = it.ti || "";
 
-        const src = it.th || (it.t === "image" ? it.s : "");
-        if (src){
+        const src1 = it.th || (it.t === "image" ? it.s : "");
+        const src2 = it.th2 || (it.t === "image" ? it.s2 : "");
+
+        if (src1){
           const im = document.createElement("img");
-          im.src = src;
           im.alt = it.ti || "";
           im.loading = "lazy";
           im.draggable = false;
+          setImgWithFallback(im, src1, src2);
           b.appendChild(im);
         } else {
           const d = document.createElement("div");
