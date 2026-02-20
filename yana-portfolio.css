@@ -233,3 +233,46 @@
   #yana-carousel-portfolio .yana-thumbbar{ grid-template-columns:46px 1fr 46px; }
   #yana-carousel-portfolio .yana-thumbs{ padding:2px 10px; }
 }
+
+/* =========================================================
+SVG arrows (CSS-only) — replaces ‹ › / ◄ ► text with SVG
+Put at VERY END of yana-portfolio.css
+========================================================= */
+
+/* 1) nav 內部用 flex 讓內容絕對置中 + 隱藏原本字元 */
+#yana-carousel-portfolio .yana-nav{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+
+  font-size:0 !important;     /* hide original glyph */
+  line-height:1 !important;
+  padding:0 !important;
+}
+
+/* 2) pseudo-element 畫 SVG（用 mask，顏色 = currentColor） */
+#yana-carousel-portfolio .yana-nav::before{
+  content:"";
+  width:18px;
+  height:18px;
+  background:currentColor;
+
+  -webkit-mask-repeat:no-repeat;
+  -webkit-mask-position:center;
+  -webkit-mask-size:contain;
+
+  mask-repeat:no-repeat;
+  mask-position:center;
+  mask-size:contain;
+}
+
+/* 3) left / right SVG paths */
+#yana-carousel-portfolio .yana-prev::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M15%2018l-6-6%206-6%27%20stroke%3D%27%23000%27%20stroke-width%3D%273%27%20fill%3D%27none%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M15%2018l-6-6%206-6%27%20stroke%3D%27%23000%27%20stroke-width%3D%273%27%20fill%3D%27none%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E");
+}
+
+#yana-carousel-portfolio .yana-next::before{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M9%206l6%206-6%206%27%20stroke%3D%27%23000%27%20stroke-width%3D%273%27%20fill%3D%27none%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E");
+  mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2024%2024%27%3E%3Cpath%20d%3D%27M9%206l6%206-6%206%27%20stroke%3D%27%23000%27%20stroke-width%3D%273%27%20fill%3D%27none%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27/%3E%3C/svg%3E");
+}
