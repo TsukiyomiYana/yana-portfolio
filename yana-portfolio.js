@@ -9,8 +9,9 @@
     ensureMarkup();
     loadScript(DATA_URL, () => {
       const cats = window.YANA_PORTFOLIO_CATS || window.CATS || [];
-      if (!Array.isArray(cats) || !cats.length) return showError("No data. Check data file exports window.YANA_PORTFOLIO_CATS.");
-
+      if (!Array.isArray(cats) || !cats.length) {
+        return showError("No data. Check data file exports window.YANA_PORTFOLIO_CATS.");
+      }
       init(cats);
     });
   });
@@ -37,12 +38,26 @@
     if (root.querySelector(".yana-stage")) return;
 
     root.classList.add("yana-carousel");
+
+    // ✅ Inline SVG arrows (reliable sizing + perfect centering)
     root.innerHTML =
       '<div class="yana-stage" aria-label="Portfolio viewer">' +
         '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
-        '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">◄</button>' +
+
+        '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">' +
+          '<svg class="yana-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+            '<path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>' +
+          '</svg>' +
+        '</button>' +
+
         '<div class="yana-media" aria-live="polite"></div>' +
-        '<button class="yana-nav yana-next" type="button" aria-label="Next item">►</button>' +
+
+        '<button class="yana-nav yana-next" type="button" aria-label="Next item">' +
+          '<svg class="yana-ico" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+            '<path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>' +
+          '</svg>' +
+        '</button>' +
+
       '</div>' +
       '<div class="yana-thumbbar" aria-label="Thumbnails">' +
         '<button class="yana-page yana-page-prev" type="button" aria-label="Scroll thumbnails left">◄</button>' +
@@ -225,7 +240,6 @@
           im.draggable = false;
           b.appendChild(im);
         } else {
-          // fallback (e.g., video without thumbnail)
           const d = document.createElement("div");
           d.className = "tcard";
           d.textContent = String(it.ti || "Item").slice(0, 24);
