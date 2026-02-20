@@ -14,6 +14,7 @@
   };
 
   // ===== 固定分類 = 固定資料夾（你要的效果）=====
+  // 會固定顯示這些 Tab（就算資料夾目前是空的）
   const FOLDER_CATS = [
     { k: "chars",  l: "3D Chars",         dir: "works/chars" },
     { k: "props",  l: "3D Props",         dir: "works/props" },
@@ -29,7 +30,7 @@
     try {
       const cats = await loadCatsFromRepo();
       if (!Array.isArray(cats) || !cats.length) {
-        return showError("No assets found. Check folders under /works/...");
+        return showError("No categories. Check FOLDER_CATS.");
       }
       init(cats);
     } catch (e) {
@@ -92,16 +93,17 @@
     // 只吃你要的檔案類型（避免 .gitkeep / workflow 等雜檔）
     const mediaPaths = allPaths.filter(p => isImagePath(p) || isVideoPath(p));
 
+    // 固定 tab；每個 tab 的 items：新在前（倒序）
     const cats = FOLDER_CATS.map(c => {
       const prefix = c.dir.replace(/\/+$/,"") + "/";
 
       const items = mediaPaths
         .filter(p => p.startsWith(prefix))
-        .sort((a,b) => a.localeCompare(b))
+        .sort((a,b) => b.localeCompare(a)) // ✅ 新在前（檔名越新越前）
         .map(p => pathToItem(p));
 
       return { k: c.k, l: c.l, i: items };
-    }).filter(c => c.i.length);
+    });
 
     return cats;
   }
@@ -231,7 +233,16 @@
     function renderMedia(){
       const items = curItems();
       stopMedia();
-      if (!items.length) return;
+
+      // 空分類顯示提示（tab 固定存在）
+      if (!items.length){
+        const empty = document.createElement("div");
+        empty.className = "yana-frame";
+        empty.textContent = "No items in this category yet.";
+        med.appendChild(empty);
+        updateNav();
+        return;
+      }
 
       const it = items[ii];
       if (!it) return;
@@ -301,11 +312,14 @@
 
         med.appendChild(meta);
       }
+
+      updateNav();
     }
 
     function renderThumbs(){
       const items = curItems();
       ths.innerHTML = "";
+
       if (!items.length) return;
 
       items.forEach((it, idx) => {
