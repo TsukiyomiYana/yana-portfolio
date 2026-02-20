@@ -123,26 +123,22 @@
   text-align:left;
 }
 
-/* 主左右箭頭：用上下 0 + margin auto 真正垂直置中 */
 #yana-carousel-portfolio .yana-nav{
   position:absolute;
-  top:0;
-  bottom:0;
-  margin:auto 0;          /* 垂直置中 */
+  top:50%;
+  transform:translateY(-50%);
   width:42px;
   height:42px;
   border-radius:999px;
   border:1px solid rgba(58,47,42,.18);
   cursor:pointer;
-  font-size:22px;
+  font-size:26px;
   line-height:42px;
   text-align:center;
   background:rgba(255,255,255,.60);
   color:#3A2F2A;
   user-select:none;
   z-index:4;
-  place-items:center;
-  transform:none;         /* 不需要 translateY */
 }
 #yana-carousel-portfolio .yana-prev{ left:12px; }
 #yana-carousel-portfolio .yana-next{ right:12px; }
@@ -233,16 +229,4 @@
   #yana-carousel-portfolio .yana-thumb .tcard{ width:72px; height:46px; font-size:10px; }
   #yana-carousel-portfolio .yana-thumbbar{ grid-template-columns:46px 1fr 46px; }
   #yana-carousel-portfolio .yana-thumbs{ padding:2px 10px; }
-}
-
-#yana-carousel-portfolio .yana-nav{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-#yana-carousel-portfolio .yana-nav .yana-ico{
-  width:32px;   /* ✅ 先用 32px，保證你肉眼看得出變化 */
-  height:32px;
-  display:block;
 }
