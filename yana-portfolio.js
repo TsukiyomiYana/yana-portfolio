@@ -446,15 +446,23 @@
     }
 
     function updateThumbFade(){
-      const max = ths.scrollWidth - ths.clientWidth;
-      const hasOverflow = max > 6;
+    const max = ths.scrollWidth - ths.clientWidth;
+    const hasOverflow = max > 6;
 
-      ths.classList.toggle("has-fade", hasOverflow);
-      ths.classList.toggle("is-centered", !hasOverflow);
+    ths.classList.toggle("has-fade", hasOverflow);
+    ths.classList.toggle("is-centered", !hasOverflow);
 
-      pagePrev.disabled = !hasOverflow || ths.scrollLeft <= 2;
-      pageNext.disabled = !hasOverflow || ths.scrollLeft >= max - 2;
-    }
+    // 沒有 overflow：兩個都不能按
+    if (!hasOverflow) {
+    pagePrev.disabled = true;
+    pageNext.disabled = true;
+    return;
+  }
+
+  // 有 overflow：左邊在最左時禁用；右邊永遠不禁用（到最右時按一下回到第一張）
+  pagePrev.disabled = ths.scrollLeft <= 2;
+  pageNext.disabled = false;
+}
 
     function queueThumbFade(){
       const token = ++fadeToken;
@@ -469,10 +477,24 @@
     }
 
     function scrollThumbs(dir){
-      const w = ths.clientWidth || 1;
-      ths.scrollBy({ left: dir * (w * 0.85), behavior:"smooth" });
+      const max = ths.scrollWidth - ths.clientWidth;
+      const hasOverflow = max > 6;
+      if (!hasOverflow) return;
+
+      const atEnd = ths.scrollLeft >= max - 2;
+
+      // 在最右邊時，按右鍵 → 回到第一張（scrollLeft = 0）
+      if (dir > 0 && atEnd) {
+      ths.scrollTo({ left: 0, behavior: "smooth" });
       setTimeout(queueThumbFade, 260);
-    }
+      return;
+  }
+
+  // 一般情況：照原本「翻頁」的距離滾動
+  const w = ths.clientWidth || 1;
+  ths.scrollBy({ left: dir * (w * 0.85), behavior:"smooth" });
+  setTimeout(queueThumbFade, 260);
+}
 
     function step(d){
       const items = curItems();
