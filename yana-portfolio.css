@@ -253,3 +253,13 @@
 #yana-carousel-portfolio .yana-thumbs::-webkit-scrollbar{
   display:none;
 }
+
+/* Hide meta card while video is playing */
+#yana-carousel-portfolio .yana-media.is-playing .yana-meta{
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(8px);
+}
+#yana-carousel-portfolio .yana-meta{
+  transition: opacity .18s ease, transform .18s ease;
+}
