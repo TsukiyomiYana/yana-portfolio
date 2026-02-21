@@ -1,50 +1,51 @@
 (() => {
-  "use strict";
-
   const ROOT_ID = "yana-carousel-portfolio";
 
-  // ===== Assets repo (放圖片的 repo) =====
+  // ===== Config =====
   const ASSETS = {
     user: "TsukiyomiYana",
     repo: "yana-portfolio-assets",
-    version: "main", // 這裡保持 main：你每次 push 新圖就會自動更新清單
-
-    // 圖片實際讀取來源：GitHub Pages
+    version: "main", // branch
+    // GitHub Pages base (assets repo)
     pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
   };
 
-  // ===== 固定分類 = 固定資料夾 =====
+  // 作品固定分類資料夾（對應 assets repo 路徑）
   const FOLDER_CATS = [
-    { k: "chars",  l: "3D Chars",         dir: "works/chars" },
-    { k: "props",  l: "3D Props",         dir: "works/props" },
-    { k: "live2d", l: "Live2D",           dir: "works/live2d" },
-    { k: "game",   l: "Game Development", dir: "works/game" },
-    { k: "sketch", l: "Sketch",           dir: "works/sketch" }
+    { k:"chars",  l:"3D Chars",        dir:"works/chars" },
+    { k:"props",  l:"3D Props",        dir:"works/props" },
+    { k:"live2d", l:"Live2D",          dir:"works/live2d" },
+    { k:"game",   l:"Game Development",dir:"works/game" },
+    { k:"sketch", l:"Sketch",          dir:"works/sketch" },
   ];
 
-  // -------- boot --------
-  waitForRoot(async () => {
+  // ===== Boot =====
+  const waitForRoot = () => new Promise((resolve) => {
+    const t = setInterval(() => {
+      const root = document.getElementById(ROOT_ID);
+      if (root) { clearInterval(t); resolve(root); }
+    }, 80);
+    setTimeout(() => { clearInterval(t); resolve(null); }, 8000);
+  });
+
+  (async () => {
+    const root = await waitForRoot();
+    if (!root) return;
+
     ensureMarkup();
 
     try {
-      const cats = await loadCatsFromRepo();
-      if (!Array.isArray(cats) || !cats.length) {
-        return showError("No categories. Check FOLDER_CATS.");
-      }
-      init(cats);
+      // 動態從 repo 樹狀結構生成分類資料
+      const CATS = await loadCatsFromRepo();
+      init(CATS);
     } catch (e) {
-      showError(e && e.message ? e.message : String(e));
+      showError(e);
+      // eslint-disable-next-line no-console
+      console.error(e);
     }
-  });
+  })();
 
-  function waitForRoot(cb){
-    let n = 0;
-    const t = setInterval(() => {
-      if (document.getElementById(ROOT_ID)) { clearInterval(t); cb(); }
-      else if (++n > 120) { clearInterval(t); console.error("[YANA] root not found"); }
-    }, 100);
-  }
-
+  // ===== Markup =====
   function ensureMarkup(){
     const root = document.getElementById(ROOT_ID);
     if (!root) return;
@@ -52,12 +53,15 @@
 
     root.classList.add("yana-carousel");
     root.innerHTML =
+      // tabs 移到 stage 外（第一層）
+      '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
+
       '<div class="yana-stage" aria-label="Portfolio viewer">' +
-        '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
         '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">‹</button>' +
         '<div class="yana-media" aria-live="polite"></div>' +
         '<button class="yana-nav yana-next" type="button" aria-label="Next item">›</button>' +
       '</div>' +
+
       '<div class="yana-thumbbar" aria-label="Thumbnails">' +
         '<button class="yana-page yana-page-prev" type="button" aria-label="Scroll thumbnails left">◄</button>' +
         '<div class="yana-thumbs" role="tablist" aria-label="Thumbnail list"></div>' +
@@ -65,13 +69,20 @@
       '</div>';
   }
 
-  function showError(msg){
+  function showError(err){
     const root = document.getElementById(ROOT_ID);
     if (!root) return;
-    const med = root.querySelector(".yana-media");
-    if (!med) return;
-    med.textContent = msg;
-    console.error("[YANA]", msg);
+    root.innerHTML =
+      '<div class="yana-card"><div class="box">' +
+      '<b>Load failed.</b><br>' +
+      '<small>' + escapeHtml(String(err && err.message ? err.message : err)) + '</small>' +
+      '</div></div>';
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, (m) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[m]));
   }
 
   // ===== Auto-load cats by listing repo files (GitHub API: always reflects latest repo state) =====
@@ -177,28 +188,93 @@
 
   // -------- carousel --------
   function init(CATS){
-    const root  = document.getElementById(ROOT_ID);
-    const tabs  = root.querySelector(".yana-tabs");
-    const med   = root.querySelector(".yana-media");
-    const prev  = root.querySelector(".yana-prev");
-    const next  = root.querySelector(".yana-next");
-    const ths   = root.querySelector(".yana-thumbs");
-    const lbtn  = root.querySelector(".yana-page-prev");
-    const rbtn  = root.querySelector(".yana-page-next");
+    const root = document.getElementById(ROOT_ID);
+    const tabs = root.querySelector(".yana-tabs");
+    const stage = root.querySelector(".yana-stage");
+    const med = root.querySelector(".yana-media");
+    const prev = root.querySelector(".yana-prev");
+    const next = root.querySelector(".yana-next");
+    const ths  = root.querySelector(".yana-thumbs");
+    const pagePrev = root.querySelector(".yana-page-prev");
+    const pageNext = root.querySelector(".yana-page-next");
 
-    let ci = 0;  // category index
-    let ii = 0;  // item index
+    // state
+    let ci = 0;      // category index
+    let ii = 0;      // item index
+    let dragging = false;
+    let dragStartX = 0;
+    let dragStartScroll = 0;
 
+    // helpers
+    const curItems = () => (CATS[ci] && Array.isArray(CATS[ci].i)) ? CATS[ci].i : [];
+
+    // events
     prev.addEventListener("click", () => step(-1));
-    next.addEventListener("click", () => step( 1));
-    lbtn.addEventListener("click", () => ths.scrollBy({ left: -ths.clientWidth * 0.8, behavior:"smooth" }));
-    rbtn.addEventListener("click", () => ths.scrollBy({ left:  ths.clientWidth * 0.8, behavior:"smooth" }));
+    next.addEventListener("click", () => step(+1));
 
+    // thumb paging
+    pagePrev.addEventListener("click", () => scrollThumbs(-1));
+    pageNext.addEventListener("click", () => scrollThumbs(+1));
+
+    // drag scroll on thumbs
+    ths.addEventListener("mousedown", (e) => {
+      dragging = true;
+      ths.classList.add("dragging");
+      dragStartX = e.pageX;
+      dragStartScroll = ths.scrollLeft;
+    });
+    window.addEventListener("mouseup", () => {
+      dragging = false;
+      ths.classList.remove("dragging");
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!dragging) return;
+      const dx = e.pageX - dragStartX;
+      ths.scrollLeft = dragStartScroll - dx;
+    });
+
+    // fade mask
+    ths.addEventListener("scroll", () => updateThumbFade());
+    window.addEventListener("resize", () => updateThumbFade(), { passive:true });
+
+    // initial
     renderTabs();
-    renderAll();
 
-    function curCat(){ return CATS[ci] || null; }
-    function curItems(){ const c = curCat(); return (c && Array.isArray(c.i)) ? c.i : []; }
+    // tabs 會因為換行/寬度改變高度：量測後用 CSS 變數把 stage 往下推，避免遮到作品圖
+    const syncTabsSpace = () => {
+      const h = Math.ceil(tabs.getBoundingClientRect().height || 0);
+      // 額外 +12px：讓 tabs 和作品框有一點呼吸空間
+      root.style.setProperty("--yana-tabs-space", (h ? (h + 12) : 56) + "px");
+    };
+    syncTabsSpace();
+
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(syncTabsSpace);
+      ro.observe(tabs);
+    }
+    window.addEventListener("resize", syncTabsSpace, { passive: true });
+
+    renderAll();
+    updateThumbFade();
+
+    // ===== functions =====
+    function scrollThumbs(dir){
+      const w = ths.clientWidth || 1;
+      ths.scrollBy({ left: dir * (w * 0.85), behavior:"smooth" });
+      setTimeout(updateThumbFade, 260);
+    }
+
+    function updateThumbFade(){
+      const max = ths.scrollWidth - ths.clientWidth;
+      const hasOverflow = max > 6;
+      ths.classList.toggle("has-fade", hasOverflow);
+
+      const center = !hasOverflow;
+      ths.classList.toggle("is-centered", center);
+
+      pagePrev.disabled = !hasOverflow || ths.scrollLeft <= 2;
+      pageNext.disabled = !hasOverflow || ths.scrollLeft >= max - 2;
+    }
 
     function step(d){
       const items = curItems();
@@ -259,6 +335,7 @@
       const items = curItems();
       stopMedia();
 
+      // 空分類顯示提示（tab 固定存在）
       if (!items.length){
         const empty = document.createElement("div");
         empty.className = "yana-frame";
@@ -288,6 +365,7 @@
         v.preload = "metadata";
         frame.appendChild(v);
       } else {
+        // 你原本的 video（iframe / YouTube embed 等）
         const f = document.createElement("iframe");
         f.src = it.s || "";
         f.title = it.ti || "video";
