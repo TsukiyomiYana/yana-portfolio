@@ -3,6 +3,11 @@
   width:100%;
   max-width:980px;
   margin:0 auto;
+
+  /* tabs 會用 absolute 佔在最上面，所以要讓 stage 往下讓位 */
+  position: relative;
+  padding-top: var(--yana-tabs-space, 56px);
+
   font-family:system-ui,"Noto Sans TC","Microsoft JhengHei",sans-serif;
   color:#3A2F2A;
 }
@@ -19,12 +24,15 @@
 
 #yana-carousel-portfolio .yana-tabs{
   position:absolute;
-  top:12px; left:12px; right:12px;
+  top:0; left:0; right:0;
   display:flex;
   gap:8px;
   flex-wrap:wrap;
-  z-index:5;
+  z-index:6;
   pointer-events:auto;
+
+  /* 讓 tabs 看起來在元件最上方（不壓到 stage） */
+  padding:12px 12px 0;
 }
 #yana-carousel-portfolio .yana-tab{
   border:1px solid rgba(58,47,42,.18);
