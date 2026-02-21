@@ -7,14 +7,13 @@
   const ASSETS = {
     user: "TsukiyomiYana",
     repo: "yana-portfolio-assets",
-    version: "main",
+    version: "main", // 這裡保持 main：你每次 push 新圖就會自動更新清單
 
-    // 你目前用 GitHub Pages 直出圖片
+    // 圖片實際讀取來源：GitHub Pages
     pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
   };
 
   // ===== 固定分類 = 固定資料夾 =====
-  // 會固定顯示這些 Tab（就算資料夾目前是空的）
   const FOLDER_CATS = [
     { k: "chars",  l: "3D Chars",         dir: "works/chars" },
     { k: "props",  l: "3D Props",         dir: "works/props" },
@@ -75,32 +74,17 @@
     console.error("[YANA]", msg);
   }
 
-  // ===== Auto-load cats by listing repo files (jsDelivr Data API) =====
+  // ===== Auto-load cats by listing repo files (GitHub API: always reflects latest repo state) =====
   async function loadCatsFromRepo(){
-    const api =
-      "https://data.jsdelivr.com/v1/packages/gh/" +
-      encodeURIComponent(ASSETS.user) + "/" +
-      encodeURIComponent(ASSETS.repo) + "@" +
-      encodeURIComponent(ASSETS.version) +
-      // ✅ cache-bust：每次載入都拿最新檔案樹
-      "?structure=tree&cb=" + Date.now();
-
-    const res = await fetch(api, { cache: "no-store" });
-    if (!res.ok) throw new Error(`Failed to fetch file list (${res.status})`);
-
-    const data = await res.json();
-    const allPaths = flattenJsDelivrFiles((data && data.files) ? data.files : [], "");
-
-    // 只吃你要的檔案類型（避免 .gitkeep / workflow 等雜檔）
+    const allPaths = await listRepoPathsViaGitHubAPI();
     const mediaPaths = allPaths.filter(p => isImagePath(p) || isVideoPath(p));
 
-    // 固定 tab；每個 tab 的 items：新在前（倒序）
     const cats = FOLDER_CATS.map(c => {
       const prefix = c.dir.replace(/\/+$/,"") + "/";
 
       const items = mediaPaths
         .filter(p => p.startsWith(prefix))
-        .sort((a,b) => b.localeCompare(a)) // ✅ 新在前（檔名越新越前）
+        .sort((a,b) => b.localeCompare(a)) // 新在前（檔名倒序）
         .map(p => pathToItem(p));
 
       return { k: c.k, l: c.l, i: items };
@@ -109,21 +93,62 @@
     return cats;
   }
 
-  function flattenJsDelivrFiles(files, prefix){
-    const out = [];
-    for (const f of files) {
-      const name = (f && typeof f.name === "string") ? f.name : "";
-      if (!name) continue;
+  async function listRepoPathsViaGitHubAPI(){
+    // 1) 先拿 branch 最新 commit（可讀到 tree sha）
+    const commitApi =
+      "https://api.github.com/repos/" +
+      encodeURIComponent(ASSETS.user) + "/" +
+      encodeURIComponent(ASSETS.repo) +
+      "/commits/" + encodeURIComponent(ASSETS.version);
 
-      const path = prefix ? (prefix + name) : name;
+    const commitRes = await fetch(commitApi, {
+      cache: "no-store",
+      headers: { "Accept": "application/vnd.github+json" }
+    });
 
-      if (Array.isArray(f.files) && f.files.length) {
-        out.push(...flattenJsDelivrFiles(f.files, path.replace(/\/+$/,"") + "/"));
-      } else {
-        out.push(path);
-      }
+    if (!commitRes.ok) {
+      const extra = rateLimitHint(commitRes);
+      throw new Error(`GitHub commit API failed (${commitRes.status})${extra}`);
     }
-    return out;
+
+    const commitData = await commitRes.json();
+    const treeSha = commitData && commitData.commit && commitData.commit.tree && commitData.commit.tree.sha;
+    if (!treeSha) throw new Error("GitHub API: tree sha not found.");
+
+    // 2) 用 tree sha 拿完整檔案樹
+    const treeApi =
+      "https://api.github.com/repos/" +
+      encodeURIComponent(ASSETS.user) + "/" +
+      encodeURIComponent(ASSETS.repo) +
+      "/git/trees/" + encodeURIComponent(treeSha) +
+      "?recursive=1";
+
+    const treeRes = await fetch(treeApi, {
+      cache: "no-store",
+      headers: { "Accept": "application/vnd.github+json" }
+    });
+
+    if (!treeRes.ok) {
+      const extra = rateLimitHint(treeRes);
+      throw new Error(`GitHub tree API failed (${treeRes.status})${extra}`);
+    }
+
+    const treeData = await treeRes.json();
+    const tree = Array.isArray(treeData && treeData.tree) ? treeData.tree : [];
+
+    // 只要檔案（blob），回傳 path list
+    return tree
+      .filter(n => n && n.type === "blob" && typeof n.path === "string")
+      .map(n => n.path);
+  }
+
+  function rateLimitHint(res){
+    // 403 有可能是 rate limit；提示一下（不影響正常情況）
+    if (res.status !== 403) return "";
+    const rem = res.headers.get("x-ratelimit-remaining");
+    const reset = res.headers.get("x-ratelimit-reset");
+    if (rem === "0" && reset) return " (rate limit hit; try again later)";
+    return "";
   }
 
   function isImagePath(p){
@@ -140,7 +165,6 @@
     const clean = String(path || "").replace(/^\/+/, "");
     const url = ASSETS.pagesBase.replace(/\/+$/,"/") + clean;
 
-    // thumbnail：先直接用原圖（零額外步驟）
     return {
       t: isVideoPath(clean) ? "video_file" : "image",
       s: url,
@@ -235,7 +259,6 @@
       const items = curItems();
       stopMedia();
 
-      // 空分類顯示提示（tab 固定存在）
       if (!items.length){
         const empty = document.createElement("div");
         empty.className = "yana-frame";
