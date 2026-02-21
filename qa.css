@@ -1,1 +1,99 @@
+/* qa.css */
+[data-qaaccordion],
+[data-qaaccordion] *{
+  font-family: "Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif !important;
+  font-size: inherit !important;
+  letter-spacing: inherit !important;
+}
 
+[data-qaaccordion]{
+  --fs: 16px;
+  --ls: 0.06em;
+  --py: 16px;
+  --ic: 16px;
+
+  font-size: var(--fs) !important;
+  letter-spacing: var(--ls) !important;
+  color: rgba(0,0,0,.62);
+  width: 100%;
+}
+
+[data-qaaccordion] details{ border-bottom: 1px solid rgba(0,0,0,.06); }
+[data-qaaccordion] details:last-child{ border-bottom: 0; }
+
+[data-qaaccordion] summary{
+  list-style: none;
+  cursor: pointer;
+  padding: var(--py) 0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  user-select:none;
+}
+[data-qaaccordion] summary::-webkit-details-marker{ display:none; }
+
+[data-qaaccordion] .row-left{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+}
+
+[data-qaaccordion] .ic{
+  width: var(--ic);
+  height: var(--ic);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  color: rgba(0,0,0,.45);
+  flex:0 0 auto;
+}
+[data-qaaccordion] .ic svg{ width:100%; height:100%; display:block; }
+
+[data-qaaccordion] .txt{
+  font-weight:650;
+  color: rgba(0,0,0,.62);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+[data-qaaccordion] summary::after{
+  content:"";
+  width:9px; height:9px;
+  border-right:2px solid rgba(0,0,0,.28);
+  border-bottom:2px solid rgba(0,0,0,.28);
+  transform: rotate(45deg);
+  transition: transform .18s ease;
+  flex:0 0 auto;
+  margin-left:12px;
+}
+[data-qaaccordion] details[open] summary::after{ transform: rotate(-135deg); }
+[data-qaaccordion] details[open] .txt{ color: rgba(0,0,0,.70); }
+
+[data-qaaccordion] .content{
+  padding: 0 0 calc(var(--py) + 2px) calc(var(--ic) + 24px);
+  color: rgba(0,0,0,.55);
+  line-height: 1.75;
+  font-size: calc(var(--fs) - 1px) !important;
+  letter-spacing: calc(var(--ls) * 0.7) !important;
+}
+
+[data-qaaccordion] .content img{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:14px;
+  margin:12px 0;
+  border:1px solid rgba(0,0,0,.06);
+}
+
+/* 三語切換（沿用你的 data-lang） */
+:root[data-lang="tw"] [data-qaaccordion] .lang-ja,
+:root[data-lang="tw"] [data-qaaccordion] .lang-en{ display:none !important; }
+
+:root[data-lang="ja"] [data-qaaccordion] .lang-tw,
+:root[data-lang="ja"] [data-qaaccordion] .lang-en{ display:none !important; }
+
+:root[data-lang="en"] [data-qaaccordion] .lang-tw,
+:root[data-lang="en"] [data-qaaccordion] .lang-ja{ display:none !important; }
