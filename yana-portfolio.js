@@ -9,7 +9,6 @@
     pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
   };
 
-  // 固定分類資料夾（圖片用）
   const FOLDER_CATS = [
     { k: "chars",  l: "3D Chars",         dir: "works/chars" },
     { k: "props",  l: "3D Props",         dir: "works/props" },
@@ -18,7 +17,6 @@
     { k: "sketch", l: "Sketch",           dir: "works/sketch" }
   ];
 
-  // 影片分類：用 JSON 放 YouTube/Vimeo 連結
   const VIDEO_MANIFEST = {
     live2d: "works/live2d/videos.json",
     game:   "works/game/videos.json"
@@ -95,7 +93,7 @@
 
       const folderItems = mediaPaths
         .filter(p => p.startsWith(prefix))
-        .sort((a,b) => b.localeCompare(a)) // 新在前（檔名倒序）
+        .sort((a,b) => b.localeCompare(a))
         .map(p => pathToFileItem(p));
 
       const manifestPath = VIDEO_MANIFEST[c.k];
@@ -182,7 +180,7 @@
     };
   }
 
-  // ===== Video manifest (YouTube / Vimeo) =====
+  // ===== Video manifest =====
   async function loadVideoItemsFromManifest(manifestPath, catKey){
     const urls = [
       `https://raw.githubusercontent.com/${ASSETS.user}/${ASSETS.repo}/${ASSETS.version}/${manifestPath}`,
@@ -213,10 +211,8 @@
       const url = String(obj.url || obj.embed || "").trim();
       if (!url) return null;
 
-      // ✅ Live2D 預設不顯示小卡片
-      const hideMetaByCat =
-        (catKey === "live2d");
-        // 如果你也想讓 Game 一起隱藏： (catKey === "live2d" || catKey === "game")
+      // Live2D 預設不顯示小卡片
+      const hideMetaByCat = (catKey === "live2d");
 
       const yt = parseYouTube(url);
       if (yt) {
@@ -329,45 +325,12 @@
 
     const curItems = () => (CATS[ci] && Array.isArray(CATS[ci].i)) ? CATS[ci].i : [];
 
-    prev.addEventListener("click", () => step(-1));
-    next.addEventListener("click", () => step(+1));
-
-    pagePrev.addEventListener("click", () => scrollThumbs(-1));
-    pageNext.addEventListener("click", () => scrollThumbs(+1));
-
-    ths.addEventListener("scroll", () => queueThumbFade());
-    window.addEventListener("resize", () => { queueThumbFade(); syncTabsSpace(); }, { passive:true });
-
-    renderTabs();
-    syncTabsSpace();
-
-    if (window.ResizeObserver) {
-      const ro = new ResizeObserver(syncTabsSpace);
-      ro.observe(tabs);
-    }
-
-    renderAll();
-    queueThumbFade(); // ✅ 初始也要跑一次（但會再等縮圖載入後重算）
+    // ✅ 先初始化（避免 TDZ）
+    let fadeToken = 0;
 
     function syncTabsSpace(){
       const h = Math.ceil(tabs.getBoundingClientRect().height || 0);
       root.style.setProperty("--yana-tabs-space", (h ? (h + 12) : 56) + "px");
-    }
-
-    // ✅ 重點：避免縮圖圖片還沒載入就誤判 overflow
-    let fadeToken = 0;
-    function queueThumbFade(){
-      const token = ++fadeToken;
-
-      // 1) 立刻下一幀算一次
-      requestAnimationFrame(() => {
-        if (token !== fadeToken) return;
-        updateThumbFade();
-      });
-
-      // 2) 再延遲兩次（讓 lazy 圖片/字型/排版完成）
-      setTimeout(() => { if (token === fadeToken) updateThumbFade(); }, 150);
-      setTimeout(() => { if (token === fadeToken) updateThumbFade(); }, 600);
     }
 
     function updateThumbFade(){
@@ -381,10 +344,22 @@
       pageNext.disabled = !hasOverflow || ths.scrollLeft >= max - 2;
     }
 
+    function queueThumbFade(){
+      const token = ++fadeToken;
+
+      requestAnimationFrame(() => {
+        if (token !== fadeToken) return;
+        updateThumbFade();
+      });
+
+      setTimeout(() => { if (token === fadeToken) updateThumbFade(); }, 150);
+      setTimeout(() => { if (token === fadeToken) updateThumbFade(); }, 600);
+    }
+
     function scrollThumbs(dir){
       const w = ths.clientWidth || 1;
       ths.scrollBy({ left: dir * (w * 0.85), behavior:"smooth" });
-      setTimeout(() => queueThumbFade(), 260);
+      setTimeout(queueThumbFade, 260);
     }
 
     function step(d){
@@ -552,9 +527,8 @@
           im.loading = "lazy";
           im.draggable = false;
 
-          // ✅ 縮圖圖片載入後再重算 overflow（修正你現在的問題）
-          im.addEventListener("load", () => queueThumbFade(), { once:true });
-          im.addEventListener("error", () => queueThumbFade(), { once:true });
+          im.addEventListener("load", queueThumbFade, { once:true });
+          im.addEventListener("error", queueThumbFade, { once:true });
 
           b.appendChild(im);
         } else {
@@ -570,18 +544,37 @@
           renderMedia();
           updateThumbSelected();
           b.scrollIntoView({ behavior:"smooth", inline:"center", block:"nearest" });
-          setTimeout(() => queueThumbFade(), 260);
+          setTimeout(queueThumbFade, 260);
         });
 
         ths.appendChild(b);
       });
 
-      queueThumbFade(); // ✅ render 完也先算一次
+      queueThumbFade();
     }
 
     function updateThumbSelected(){
       const btns = ths.querySelectorAll(".yana-thumb");
       btns.forEach((b, idx) => b.setAttribute("aria-selected", idx === ii ? "true" : "false"));
     }
+
+    // ===== Wire events AFTER functions exist =====
+    prev.addEventListener("click", () => step(-1));
+    next.addEventListener("click", () => step(+1));
+    pagePrev.addEventListener("click", () => scrollThumbs(-1));
+    pageNext.addEventListener("click", () => scrollThumbs(+1));
+    ths.addEventListener("scroll", queueThumbFade);
+    window.addEventListener("resize", () => { queueThumbFade(); syncTabsSpace(); }, { passive:true });
+
+    renderTabs();
+    syncTabsSpace();
+
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(syncTabsSpace);
+      ro.observe(tabs);
+    }
+
+    renderAll();
+    queueThumbFade();
   }
 })();
