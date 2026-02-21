@@ -239,3 +239,17 @@
   #yana-carousel-portfolio .yana-thumbbar{ grid-template-columns:46px 1fr 46px; }
   #yana-carousel-portfolio .yana-thumbs{ padding:2px 10px; }
 }
+
+/* Thumbs edge fade (only when overflow) */
+#yana-carousel-portfolio .yana-thumbs.has-fade{
+  -webkit-mask-image:linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+  mask-image:linear-gradient(to right, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+}
+
+/* Hide scrollbar (optional but recommended) */
+#yana-carousel-portfolio .yana-thumbs{
+  scrollbar-width:none;
+}
+#yana-carousel-portfolio .yana-thumbs::-webkit-scrollbar{
+  display:none;
+}
