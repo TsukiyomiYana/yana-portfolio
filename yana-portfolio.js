@@ -18,9 +18,11 @@
   ];
 
   const VIDEO_MANIFEST = {
+    chars:  "works/chars/videos.json",
+    props:  "works/props/videos.json",
     live2d: "works/live2d/videos.json",
     game:   "works/game/videos.json"
-  };
+};
 
   // ===== Boot =====
   const waitForRoot = () => new Promise((resolve) => {
@@ -752,3 +754,4 @@
     }
   }
 })();
+
