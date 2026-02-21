@@ -5,19 +5,25 @@
   const ASSETS = {
     user: "TsukiyomiYana",
     repo: "yana-portfolio-assets",
-    version: "main", // branch
-    // GitHub Pages base (assets repo)
+    version: "main",
+    // 圖片來源：GitHub Pages（assets repo）
     pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
   };
 
-  // 作品固定分類資料夾（對應 assets repo 路徑）
+  // 固定分類資料夾（圖片用）
   const FOLDER_CATS = [
-    { k:"chars",  l:"3D Chars",        dir:"works/chars" },
-    { k:"props",  l:"3D Props",        dir:"works/props" },
-    { k:"live2d", l:"Live2D",          dir:"works/live2d" },
-    { k:"game",   l:"Game Development",dir:"works/game" },
-    { k:"sketch", l:"Sketch",          dir:"works/sketch" },
+    { k: "chars",  l: "3D Chars",         dir: "works/chars" },
+    { k: "props",  l: "3D Props",         dir: "works/props" },
+    { k: "live2d", l: "Live2D",           dir: "works/live2d" },
+    { k: "game",   l: "Game Development", dir: "works/game" },
+    { k: "sketch", l: "Sketch",           dir: "works/sketch" }
   ];
+
+  // 影片分類：用 JSON 放 YouTube/Vimeo 連結（不需要上傳影片檔）
+  const VIDEO_MANIFEST = {
+    live2d: "works/live2d/videos.json",
+    game:   "works/game/videos.json"
+  };
 
   // ===== Boot =====
   const waitForRoot = () => new Promise((resolve) => {
@@ -35,12 +41,10 @@
     ensureMarkup();
 
     try {
-      // 動態從 repo 樹狀結構生成分類資料
       const CATS = await loadCatsFromRepo();
       init(CATS);
     } catch (e) {
       showError(e);
-      // eslint-disable-next-line no-console
       console.error(e);
     }
   })();
@@ -53,15 +57,12 @@
 
     root.classList.add("yana-carousel");
     root.innerHTML =
-      // tabs 移到 stage 外（第一層）
       '<div class="yana-tabs" role="tablist" aria-label="Categories"></div>' +
-
       '<div class="yana-stage" aria-label="Portfolio viewer">' +
         '<button class="yana-nav yana-prev" type="button" aria-label="Previous item">‹</button>' +
         '<div class="yana-media" aria-live="polite"></div>' +
         '<button class="yana-nav yana-next" type="button" aria-label="Next item">›</button>' +
       '</div>' +
-
       '<div class="yana-thumbbar" aria-label="Thumbnails">' +
         '<button class="yana-page yana-page-prev" type="button" aria-label="Scroll thumbnails left">◄</button>' +
         '<div class="yana-thumbs" role="tablist" aria-label="Thumbnail list"></div>' +
@@ -85,27 +86,32 @@
     }[m]));
   }
 
-  // ===== Auto-load cats by listing repo files (GitHub API: always reflects latest repo state) =====
+  // ===== Repo listing (GitHub API) =====
   async function loadCatsFromRepo(){
     const allPaths = await listRepoPathsViaGitHubAPI();
-    const mediaPaths = allPaths.filter(p => isImagePath(p) || isVideoPath(p));
+    const mediaPaths = allPaths.filter(p => isImagePath(p) || isVideoFilePath(p));
 
-    const cats = FOLDER_CATS.map(c => {
+    const cats = await Promise.all(FOLDER_CATS.map(async (c) => {
       const prefix = c.dir.replace(/\/+$/,"") + "/";
 
-      const items = mediaPaths
+      const folderItems = mediaPaths
         .filter(p => p.startsWith(prefix))
         .sort((a,b) => b.localeCompare(a)) // 新在前（檔名倒序）
-        .map(p => pathToItem(p));
+        .map(p => pathToFileItem(p));
 
-      return { k: c.k, l: c.l, i: items };
-    });
+      const manifestPath = VIDEO_MANIFEST[c.k];
+      if (manifestPath) {
+        const videoItems = await loadVideoItemsFromManifest(manifestPath);
+        return { k: c.k, l: c.l, i: [...videoItems, ...folderItems] };
+      }
+
+      return { k: c.k, l: c.l, i: folderItems };
+    }));
 
     return cats;
   }
 
   async function listRepoPathsViaGitHubAPI(){
-    // 1) 先拿 branch 最新 commit（可讀到 tree sha）
     const commitApi =
       "https://api.github.com/repos/" +
       encodeURIComponent(ASSETS.user) + "/" +
@@ -117,16 +123,12 @@
       headers: { "Accept": "application/vnd.github+json" }
     });
 
-    if (!commitRes.ok) {
-      const extra = rateLimitHint(commitRes);
-      throw new Error(`GitHub commit API failed (${commitRes.status})${extra}`);
-    }
+    if (!commitRes.ok) throw new Error(`GitHub commit API failed (${commitRes.status})${rateLimitHint(commitRes)}`);
 
     const commitData = await commitRes.json();
     const treeSha = commitData && commitData.commit && commitData.commit.tree && commitData.commit.tree.sha;
     if (!treeSha) throw new Error("GitHub API: tree sha not found.");
 
-    // 2) 用 tree sha 拿完整檔案樹
     const treeApi =
       "https://api.github.com/repos/" +
       encodeURIComponent(ASSETS.user) + "/" +
@@ -139,22 +141,17 @@
       headers: { "Accept": "application/vnd.github+json" }
     });
 
-    if (!treeRes.ok) {
-      const extra = rateLimitHint(treeRes);
-      throw new Error(`GitHub tree API failed (${treeRes.status})${extra}`);
-    }
+    if (!treeRes.ok) throw new Error(`GitHub tree API failed (${treeRes.status})${rateLimitHint(treeRes)}`);
 
     const treeData = await treeRes.json();
     const tree = Array.isArray(treeData && treeData.tree) ? treeData.tree : [];
 
-    // 只要檔案（blob），回傳 path list
     return tree
       .filter(n => n && n.type === "blob" && typeof n.path === "string")
       .map(n => n.path);
   }
 
   function rateLimitHint(res){
-    // 403 有可能是 rate limit；提示一下（不影響正常情況）
     if (res.status !== 403) return "";
     const rem = res.headers.get("x-ratelimit-remaining");
     const reset = res.headers.get("x-ratelimit-reset");
@@ -166,31 +163,132 @@
     const x = String(p).toLowerCase();
     return x.endsWith(".png") || x.endsWith(".jpg") || x.endsWith(".jpeg") || x.endsWith(".webp");
   }
-
-  function isVideoPath(p){
+  function isVideoFilePath(p){
     const x = String(p).toLowerCase();
     return x.endsWith(".mp4") || x.endsWith(".webm");
   }
 
-  function pathToItem(path){
+  function pathToFileItem(path){
     const clean = String(path || "").replace(/^\/+/, "");
     const url = ASSETS.pagesBase.replace(/\/+$/,"/") + clean;
 
     return {
-      t: isVideoPath(clean) ? "video_file" : "image",
+      t: isVideoFilePath(clean) ? "video_file" : "image",
       s: url,
-      th: isVideoPath(clean) ? "" : url,
+      th: isVideoFilePath(clean) ? "" : url,
       ti: "",
       d: "",
       links: []
     };
   }
 
-  // -------- carousel --------
+  // ===== Video manifest (YouTube / Vimeo) =====
+  async function loadVideoItemsFromManifest(manifestPath){
+    const urls = [
+      `https://raw.githubusercontent.com/${ASSETS.user}/${ASSETS.repo}/${ASSETS.version}/${manifestPath}`,
+      ASSETS.pagesBase.replace(/\/+$/,"/") + manifestPath.replace(/^\/+/,""),
+      `https://cdn.jsdelivr.net/gh/${ASSETS.user}/${ASSETS.repo}@${ASSETS.version}/${manifestPath}`
+    ];
+
+    let data = null;
+    for (const u of urls) {
+      try {
+        const res = await fetch(u, { cache: "no-store" });
+        if (!res.ok) continue;
+        data = await res.json();
+        if (data) break;
+      } catch (_) {}
+    }
+
+    if (!Array.isArray(data)) return [];
+    const items = await Promise.all(data.map(entryToVideoItem));
+    return items.filter(Boolean);
+  }
+
+  async function entryToVideoItem(entry){
+    try {
+      const obj = (typeof entry === "string") ? { url: entry } : (entry && typeof entry === "object" ? entry : null);
+      if (!obj) return null;
+
+      const url = String(obj.url || obj.embed || "").trim();
+      if (!url) return null;
+
+      const yt = parseYouTube(url);
+      if (yt) {
+        const embed = `https://www.youtube-nocookie.com/embed/${yt}?rel=0`;
+        const thumb = obj.thumb ? String(obj.thumb) : `https://i.ytimg.com/vi/${yt}/hqdefault.jpg`;
+        return { t:"embed", s:embed, th:thumb, ti:obj.title?String(obj.title):"", d:obj.desc?String(obj.desc):"", links:normalizeLinks(obj.links) };
+      }
+
+      const vm = parseVimeo(url);
+      if (vm) {
+        const embed = `https://player.vimeo.com/video/${vm}?title=0&byline=0&portrait=0`;
+        let thumb = obj.thumb ? String(obj.thumb) : "";
+        if (!thumb) thumb = await fetchVimeoThumb(`https://vimeo.com/${vm}`);
+        return { t:"embed", s:embed, th:thumb||"", ti:obj.title?String(obj.title):"", d:obj.desc?String(obj.desc):"", links:normalizeLinks(obj.links) };
+      }
+
+      const thumb = obj.thumb ? String(obj.thumb) : "";
+      return { t:"embed", s:url, th:thumb, ti:obj.title?String(obj.title):"", d:obj.desc?String(obj.desc):"", links:normalizeLinks(obj.links) };
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function normalizeLinks(links){
+    if (!Array.isArray(links)) return [];
+    return links
+      .filter(x => x && typeof x === "object")
+      .map(x => ({ label: String(x.label || "Link"), url: String(x.url || "#") }))
+      .filter(x => x.url && x.url !== "#");
+  }
+
+  function parseYouTube(url){
+    const u = String(url);
+    if (/^[a-zA-Z0-9_-]{11}$/.test(u)) return u;
+    const patterns = [
+      /[?&]v=([a-zA-Z0-9_-]{11})/,
+      /youtu\.be\/([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/
+    ];
+    for (const re of patterns) {
+      const m = u.match(re);
+      if (m && m[1]) return m[1];
+    }
+    return null;
+  }
+
+  function parseVimeo(url){
+    const u = String(url);
+    if (/^\d+$/.test(u)) return u;
+    const patterns = [
+      /vimeo\.com\/(\d+)/,
+      /player\.vimeo\.com\/video\/(\d+)/
+    ];
+    for (const re of patterns) {
+      const m = u.match(re);
+      if (m && m[1]) return m[1];
+    }
+    return null;
+  }
+
+  async function fetchVimeoThumb(vimeoUrl){
+    try {
+      const api = "https://vimeo.com/api/oembed.json?url=" + encodeURIComponent(vimeoUrl);
+      const res = await fetch(api, { cache: "no-store" });
+      if (!res.ok) return "";
+      const j = await res.json();
+      return j && j.thumbnail_url ? String(j.thumbnail_url) : "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  // ===== Carousel UI =====
   function init(CATS){
     const root = document.getElementById(ROOT_ID);
     const tabs = root.querySelector(".yana-tabs");
-    const stage = root.querySelector(".yana-stage");
     const med = root.querySelector(".yana-media");
     const prev = root.querySelector(".yana-prev");
     const next = root.querySelector(".yana-next");
@@ -198,66 +296,51 @@
     const pagePrev = root.querySelector(".yana-page-prev");
     const pageNext = root.querySelector(".yana-page-next");
 
-    // state
-    let ci = 0;      // category index
-    let ii = 0;      // item index
+    let ci = 0;
+    let ii = 0;
     let dragging = false;
     let dragStartX = 0;
     let dragStartScroll = 0;
 
-    // helpers
     const curItems = () => (CATS[ci] && Array.isArray(CATS[ci].i)) ? CATS[ci].i : [];
 
-    // events
     prev.addEventListener("click", () => step(-1));
     next.addEventListener("click", () => step(+1));
 
-    // thumb paging
     pagePrev.addEventListener("click", () => scrollThumbs(-1));
     pageNext.addEventListener("click", () => scrollThumbs(+1));
 
-    // drag scroll on thumbs
     ths.addEventListener("mousedown", (e) => {
       dragging = true;
-      ths.classList.add("dragging");
       dragStartX = e.pageX;
       dragStartScroll = ths.scrollLeft;
     });
-    window.addEventListener("mouseup", () => {
-      dragging = false;
-      ths.classList.remove("dragging");
-    });
+    window.addEventListener("mouseup", () => { dragging = false; });
     window.addEventListener("mousemove", (e) => {
       if (!dragging) return;
       const dx = e.pageX - dragStartX;
       ths.scrollLeft = dragStartScroll - dx;
+      updateThumbFade();
     });
 
-    // fade mask
     ths.addEventListener("scroll", () => updateThumbFade());
-    window.addEventListener("resize", () => updateThumbFade(), { passive:true });
+    window.addEventListener("resize", () => { updateThumbFade(); syncTabsSpace(); }, { passive:true });
 
-    // initial
     renderTabs();
 
-    // tabs 會因為換行/寬度改變高度：量測後用 CSS 變數把 stage 往下推，避免遮到作品圖
-    const syncTabsSpace = () => {
+    function syncTabsSpace(){
       const h = Math.ceil(tabs.getBoundingClientRect().height || 0);
-      // 額外 +12px：讓 tabs 和作品框有一點呼吸空間
       root.style.setProperty("--yana-tabs-space", (h ? (h + 12) : 56) + "px");
-    };
+    }
     syncTabsSpace();
-
     if (window.ResizeObserver) {
       const ro = new ResizeObserver(syncTabsSpace);
       ro.observe(tabs);
     }
-    window.addEventListener("resize", syncTabsSpace, { passive: true });
 
     renderAll();
     updateThumbFade();
 
-    // ===== functions =====
     function scrollThumbs(dir){
       const w = ths.clientWidth || 1;
       ths.scrollBy({ left: dir * (w * 0.85), behavior:"smooth" });
@@ -268,9 +351,7 @@
       const max = ths.scrollWidth - ths.clientWidth;
       const hasOverflow = max > 6;
       ths.classList.toggle("has-fade", hasOverflow);
-
-      const center = !hasOverflow;
-      ths.classList.toggle("is-centered", center);
+      ths.classList.toggle("is-centered", !hasOverflow);
 
       pagePrev.disabled = !hasOverflow || ths.scrollLeft <= 2;
       pageNext.disabled = !hasOverflow || ths.scrollLeft >= max - 2;
@@ -335,7 +416,6 @@
       const items = curItems();
       stopMedia();
 
-      // 空分類顯示提示（tab 固定存在）
       if (!items.length){
         const empty = document.createElement("div");
         empty.className = "yana-frame";
@@ -365,7 +445,6 @@
         v.preload = "metadata";
         frame.appendChild(v);
       } else {
-        // 你原本的 video（iframe / YouTube embed 等）
         const f = document.createElement("iframe");
         f.src = it.s || "";
         f.title = it.ti || "video";
@@ -420,7 +499,6 @@
     function renderThumbs(){
       const items = curItems();
       ths.innerHTML = "";
-
       if (!items.length) return;
 
       items.forEach((it, idx) => {
@@ -442,7 +520,7 @@
         } else {
           const d = document.createElement("div");
           d.className = "tcard";
-          d.textContent = String(it.ti || "Item").slice(0, 24);
+          d.textContent = String(it.ti || "Video").slice(0, 24);
           b.appendChild(d);
         }
 
