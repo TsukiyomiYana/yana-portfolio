@@ -216,7 +216,8 @@
 
       const yt = parseYouTube(url);
       if (yt) {
-        const embed = `https://www.youtube-nocookie.com/embed/${yt}?rel=0`;
+        const origin = location.origin;
+        const embed = `https://www.youtube-nocookie.com/embed/${yt}?rel=0&enablejsapi=1&origin=${encodeURIComponent(origin)}`;
         const thumb = obj.thumb ? String(obj.thumb) : `https://i.ytimg.com/vi/${yt}/hqdefault.jpg`;
         return {
           t:"embed",
@@ -309,6 +310,117 @@
     }
   }
 
+  // ===== Player APIs (YouTube / Vimeo) =====
+  function loadYouTubeApi(){
+    if (window.YT && window.YT.Player) return Promise.resolve(window.YT);
+    if (window.__yanaYTReady) return window.__yanaYTReady;
+
+    window.__yanaYTReady = new Promise((resolve, reject) => {
+      const prev = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = () => {
+        try { if (typeof prev === "function") prev(); } catch(_) {}
+        resolve(window.YT);
+      };
+
+      const s = document.createElement("script");
+      s.src = "https://www.youtube.com/iframe_api";
+      s.async = true;
+      s.onerror = () => reject(new Error("Failed to load YouTube IFrame API"));
+      document.head.appendChild(s);
+    });
+
+    return window.__yanaYTReady;
+  }
+
+  function loadVimeoApi(){
+    if (window.Vimeo && window.Vimeo.Player) return Promise.resolve(window.Vimeo);
+    if (window.__yanaVimeoReady) return window.__yanaVimeoReady;
+
+    window.__yanaVimeoReady = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = "https://player.vimeo.com/api/player.js";
+      s.async = true;
+      s.onload = () => resolve(window.Vimeo);
+      s.onerror = () => reject(new Error("Failed to load Vimeo Player API"));
+      document.head.appendChild(s);
+    });
+
+    return window.__yanaVimeoReady;
+  }
+
+  function attachPlaybackAutoHide(iframe, onPlay, onStop){
+    const src = String(iframe && iframe.src || "");
+
+    // YouTube
+    if (/youtube(-nocookie)?\.com\/embed\//i.test(src)) {
+      let player = null;
+      let destroyed = false;
+
+      if (!iframe.id) iframe.id = "yana-yt-" + Math.random().toString(36).slice(2);
+
+      loadYouTubeApi().then((YT) => {
+        if (destroyed || !YT || !YT.Player) return;
+
+        player = new YT.Player(iframe.id, {
+          events: {
+            onReady: () => {
+              try {
+                const st = player.getPlayerState();
+                if (st === YT.PlayerState.PLAYING || st === YT.PlayerState.BUFFERING) onPlay();
+                else onStop();
+              } catch(_) {}
+            },
+            onStateChange: (e) => {
+              const st = e.data;
+              if (st === YT.PlayerState.PLAYING || st === YT.PlayerState.BUFFERING) onPlay();
+              if (st === YT.PlayerState.PAUSED || st === YT.PlayerState.ENDED) onStop();
+            }
+          }
+        });
+      }).catch(() => {});
+
+      return () => {
+        destroyed = true;
+        onStop();
+        try { player && player.destroy && player.destroy(); } catch(_) {}
+      };
+    }
+
+    // Vimeo
+    if (/player\.vimeo\.com\/video\//i.test(src)) {
+      let player = null;
+      let destroyed = false;
+
+      loadVimeoApi().then((Vimeo) => {
+        if (destroyed || !Vimeo || !Vimeo.Player) return;
+
+        player = new Vimeo.Player(iframe);
+        player.on("play", onPlay);
+        player.on("pause", onStop);
+        player.on("ended", onStop);
+
+        player.getPaused().then((paused) => {
+          if (!destroyed) paused ? onStop() : onPlay();
+        }).catch(() => {});
+      }).catch(() => {});
+
+      return () => {
+        destroyed = true;
+        onStop();
+        try {
+          if (player) {
+            player.off("play", onPlay);
+            player.off("pause", onStop);
+            player.off("ended", onStop);
+            player.destroy && player.destroy();
+          }
+        } catch(_) {}
+      };
+    }
+
+    return () => { onStop(); };
+  }
+
   // ===== Carousel UI =====
   function init(CATS){
     const root = document.getElementById(ROOT_ID);
@@ -325,7 +437,7 @@
 
     const curItems = () => (CATS[ci] && Array.isArray(CATS[ci].i)) ? CATS[ci].i : [];
 
-    // ✅ 先初始化（避免 TDZ）
+    // avoid TDZ
     let fadeToken = 0;
 
     function syncTabsSpace(){
@@ -385,10 +497,6 @@
           updateTabSelected();
           renderAll();
           queueThumbFade();
-
-          if (document.fonts && document.fonts.ready) {
-          document.fonts.ready.then(() => queueThumbFade()).catch(() => {});
-}
         });
         tabs.appendChild(b);
       });
@@ -413,6 +521,12 @@
     }
 
     function stopMedia(){
+      if (med.__cleanupPlayer) {
+        try { med.__cleanupPlayer(); } catch(_) {}
+        med.__cleanupPlayer = null;
+      }
+      med.classList.remove("is-playing");
+
       const ifs = med.querySelectorAll("iframe");
       ifs.forEach(f => { try { f.src = "about:blank"; } catch(e){} });
 
@@ -441,6 +555,9 @@
       const frame = document.createElement("div");
       frame.className = "yana-frame";
 
+      let iframeEl = null;
+      let videoEl = null;
+
       if (it.t === "image"){
         const im = document.createElement("img");
         im.src = it.s || "";
@@ -454,6 +571,7 @@
         v.playsInline = true;
         v.preload = "metadata";
         frame.appendChild(v);
+        videoEl = v;
       } else {
         const f = document.createElement("iframe");
         f.src = it.s || "";
@@ -461,9 +579,34 @@
         f.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
         f.allowFullscreen = true;
         frame.appendChild(f);
+        iframeEl = f;
       }
 
       med.appendChild(frame);
+
+      // ---- Auto-hide meta while playing (only matters when meta exists; Game has meta) ----
+      if (iframeEl) {
+        if (med.__cleanupPlayer) { try { med.__cleanupPlayer(); } catch(_) {} }
+        med.__cleanupPlayer = attachPlaybackAutoHide(
+          iframeEl,
+          () => med.classList.add("is-playing"),
+          () => med.classList.remove("is-playing")
+        );
+      } else if (videoEl) {
+        const onPlay = () => med.classList.add("is-playing");
+        const onStop = () => med.classList.remove("is-playing");
+        videoEl.addEventListener("play", onPlay);
+        videoEl.addEventListener("pause", onStop);
+        videoEl.addEventListener("ended", onStop);
+        med.__cleanupPlayer = () => {
+          try {
+            videoEl.removeEventListener("play", onPlay);
+            videoEl.removeEventListener("pause", onStop);
+            videoEl.removeEventListener("ended", onStop);
+          } catch(_) {}
+          onStop();
+        };
+      }
 
       // 小卡片（Live2D 預設隱藏）
       const catKey = (CATS[ci] && CATS[ci].k) ? CATS[ci].k : "";
@@ -562,7 +705,7 @@
       btns.forEach((b, idx) => b.setAttribute("aria-selected", idx === ii ? "true" : "false"));
     }
 
-    // ===== Wire events AFTER functions exist =====
+    // ===== Wire events =====
     prev.addEventListener("click", () => step(-1));
     next.addEventListener("click", () => step(+1));
     pagePrev.addEventListener("click", () => scrollThumbs(-1));
@@ -580,5 +723,10 @@
 
     renderAll();
     queueThumbFade();
+
+    // 放在 init 結尾：字型載入完成後重算一次（穩定）
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => queueThumbFade()).catch(() => {});
+    }
   }
 })();
