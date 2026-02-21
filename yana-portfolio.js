@@ -385,6 +385,10 @@
           updateTabSelected();
           renderAll();
           queueThumbFade();
+
+          if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(() => queueThumbFade()).catch(() => {});
+}
         });
         tabs.appendChild(b);
       });
