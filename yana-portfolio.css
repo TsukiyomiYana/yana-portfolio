@@ -26,6 +26,7 @@
   position:absolute;
   top:0; left:0; right:0;
   display:flex;
+  justify-content: center;   /* 置中 */
   gap:8px;
   flex-wrap:wrap;
   z-index:6;
