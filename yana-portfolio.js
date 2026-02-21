@@ -214,7 +214,7 @@
       if (!url) return null;
 
       // Live2D 預設不顯示小卡片
-      const hideMetaByCat = (catKey === "live2d");
+      const hideMetaByCat = (catKey === "live2d" || catKey === "chars" || catKey === "props");
 
       const yt = parseYouTube(url);
       if (yt) {
@@ -634,7 +634,7 @@
 
       // 小卡片（Live2D 預設隱藏）
       const catKey = (CATS[ci] && CATS[ci].k) ? CATS[ci].k : "";
-      const hideMeta = (it.hm === true) || (catKey === "live2d");
+      const hideMeta = (it.hm === true) || (catKey === "live2d" || catKey === "chars" || catKey === "props");
 
       const hasDesc  = !!(it.d && String(it.d).trim());
       const hasLinks = Array.isArray(it.links) && it.links.length;
@@ -754,4 +754,5 @@
     }
   }
 })();
+
 
