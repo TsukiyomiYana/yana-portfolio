@@ -6,7 +6,6 @@
     user: "TsukiyomiYana",
     repo: "yana-portfolio-assets",
     version: "main",
-    // 圖片來源：GitHub Pages（assets repo）
     pagesBase: "https://tsukiyomiyana.github.io/yana-portfolio-assets/"
   };
 
@@ -101,7 +100,8 @@
 
       const manifestPath = VIDEO_MANIFEST[c.k];
       if (manifestPath) {
-        const videoItems = await loadVideoItemsFromManifest(manifestPath);
+        const videoItems = await loadVideoItemsFromManifest(manifestPath, c.k);
+        // 你如果同分類也想同時支援「影片清單 + 資料夾圖片」就保留這行
         return { k: c.k, l: c.l, i: [...videoItems, ...folderItems] };
       }
 
@@ -183,7 +183,7 @@
   }
 
   // ===== Video manifest (YouTube / Vimeo) =====
-  async function loadVideoItemsFromManifest(manifestPath){
+  async function loadVideoItemsFromManifest(manifestPath, catKey){
     const urls = [
       `https://raw.githubusercontent.com/${ASSETS.user}/${ASSETS.repo}/${ASSETS.version}/${manifestPath}`,
       ASSETS.pagesBase.replace(/\/+$/,"/") + manifestPath.replace(/^\/+/,""),
@@ -201,11 +201,11 @@
     }
 
     if (!Array.isArray(data)) return [];
-    const items = await Promise.all(data.map(entryToVideoItem));
+    const items = await Promise.all(data.map((entry) => entryToVideoItem(entry, catKey)));
     return items.filter(Boolean);
   }
 
-  async function entryToVideoItem(entry){
+  async function entryToVideoItem(entry, catKey){
     try {
       const obj = (typeof entry === "string") ? { url: entry } : (entry && typeof entry === "object" ? entry : null);
       if (!obj) return null;
@@ -213,11 +213,25 @@
       const url = String(obj.url || obj.embed || "").trim();
       if (!url) return null;
 
+      // ✅ Live2D 預設不顯示小卡片（你要的效果）
+      const hideMetaByCat =
+        (catKey === "live2d");
+        // 如果你也想讓 Game 一起隱藏，把上面改成：
+        // (catKey === "live2d" || catKey === "game");
+
       const yt = parseYouTube(url);
       if (yt) {
         const embed = `https://www.youtube-nocookie.com/embed/${yt}?rel=0`;
         const thumb = obj.thumb ? String(obj.thumb) : `https://i.ytimg.com/vi/${yt}/hqdefault.jpg`;
-        return { t:"embed", s:embed, th:thumb, ti:obj.title?String(obj.title):"", d:obj.desc?String(obj.desc):"", links:normalizeLinks(obj.links) };
+        return {
+          t:"embed",
+          s:embed,
+          th:thumb,
+          ti: obj.title ? String(obj.title) : "",
+          d:  obj.desc  ? String(obj.desc)  : "",
+          links: normalizeLinks(obj.links),
+          hm: !!(obj.hideMeta ?? hideMetaByCat)
+        };
       }
 
       const vm = parseVimeo(url);
@@ -225,11 +239,27 @@
         const embed = `https://player.vimeo.com/video/${vm}?title=0&byline=0&portrait=0`;
         let thumb = obj.thumb ? String(obj.thumb) : "";
         if (!thumb) thumb = await fetchVimeoThumb(`https://vimeo.com/${vm}`);
-        return { t:"embed", s:embed, th:thumb||"", ti:obj.title?String(obj.title):"", d:obj.desc?String(obj.desc):"", links:normalizeLinks(obj.links) };
+        return {
+          t:"embed",
+          s:embed,
+          th:thumb || "",
+          ti: obj.title ? String(obj.title) : "",
+          d:  obj.desc  ? String(obj.desc)  : "",
+          links: normalizeLinks(obj.links),
+          hm: !!(obj.hideMeta ?? hideMetaByCat)
+        };
       }
 
-      const thumb = obj.thumb ? String(obj.thumb) : "";
-      return { t:"embed", s:url, th:thumb, ti:obj.title?String(obj.title):"", d:obj.desc?String(obj.desc):"", links:normalizeLinks(obj.links) };
+      // fallback: treat as iframe url
+      return {
+        t:"embed",
+        s:url,
+        th: obj.thumb ? String(obj.thumb) : "",
+        ti: obj.title ? String(obj.title) : "",
+        d:  obj.desc  ? String(obj.desc)  : "",
+        links: normalizeLinks(obj.links),
+        hm: !!(obj.hideMeta ?? hideMetaByCat)
+      };
     } catch (_) {
       return null;
     }
@@ -298,9 +328,6 @@
 
     let ci = 0;
     let ii = 0;
-    let dragging = false;
-    let dragStartX = 0;
-    let dragStartScroll = 0;
 
     const curItems = () => (CATS[ci] && Array.isArray(CATS[ci].i)) ? CATS[ci].i : [];
 
@@ -309,19 +336,6 @@
 
     pagePrev.addEventListener("click", () => scrollThumbs(-1));
     pageNext.addEventListener("click", () => scrollThumbs(+1));
-
-    ths.addEventListener("mousedown", (e) => {
-      dragging = true;
-      dragStartX = e.pageX;
-      dragStartScroll = ths.scrollLeft;
-    });
-    window.addEventListener("mouseup", () => { dragging = false; });
-    window.addEventListener("mousemove", (e) => {
-      if (!dragging) return;
-      const dx = e.pageX - dragStartX;
-      ths.scrollLeft = dragStartScroll - dx;
-      updateThumbFade();
-    });
 
     ths.addEventListener("scroll", () => updateThumbFade());
     window.addEventListener("resize", () => { updateThumbFade(); syncTabsSpace(); }, { passive:true });
@@ -455,10 +469,17 @@
 
       med.appendChild(frame);
 
+      // ✅ 這裡就是「小卡片」：Live2D 會隱藏
+      const catKey = (CATS[ci] && CATS[ci].k) ? CATS[ci].k : "";
+      const hideMeta =
+        (it.hm === true) || (catKey === "live2d");
+        // 如果你也要讓 Game 一起隱藏，把上面改成：
+        // (it.hm === true) || (catKey === "live2d" || catKey === "game");
+
       const hasDesc  = !!(it.d && String(it.d).trim());
       const hasLinks = Array.isArray(it.links) && it.links.length;
 
-      if (it.ti || hasDesc || hasLinks){
+      if (!hideMeta && (it.ti || hasDesc || hasLinks)){
         const meta = document.createElement("div");
         meta.className = "yana-meta";
 
