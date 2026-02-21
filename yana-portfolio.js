@@ -18,7 +18,7 @@
     { k: "sketch", l: "Sketch",           dir: "works/sketch" }
   ];
 
-  // 影片分類：用 JSON 放 YouTube/Vimeo 連結（不需要上傳影片檔）
+  // 影片分類：用 JSON 放 YouTube/Vimeo 連結
   const VIDEO_MANIFEST = {
     live2d: "works/live2d/videos.json",
     game:   "works/game/videos.json"
@@ -101,7 +101,6 @@
       const manifestPath = VIDEO_MANIFEST[c.k];
       if (manifestPath) {
         const videoItems = await loadVideoItemsFromManifest(manifestPath, c.k);
-        // 你如果同分類也想同時支援「影片清單 + 資料夾圖片」就保留這行
         return { k: c.k, l: c.l, i: [...videoItems, ...folderItems] };
       }
 
@@ -178,7 +177,8 @@
       th: isVideoFilePath(clean) ? "" : url,
       ti: "",
       d: "",
-      links: []
+      links: [],
+      hm: false
     };
   }
 
@@ -213,11 +213,10 @@
       const url = String(obj.url || obj.embed || "").trim();
       if (!url) return null;
 
-      // ✅ Live2D 預設不顯示小卡片（你要的效果）
+      // ✅ Live2D 預設不顯示小卡片
       const hideMetaByCat =
         (catKey === "live2d");
-        // 如果你也想讓 Game 一起隱藏，把上面改成：
-        // (catKey === "live2d" || catKey === "game");
+        // 如果你也想讓 Game 一起隱藏： (catKey === "live2d" || catKey === "game")
 
       const yt = parseYouTube(url);
       if (yt) {
@@ -250,7 +249,6 @@
         };
       }
 
-      // fallback: treat as iframe url
       return {
         t:"embed",
         s:url,
@@ -337,38 +335,56 @@
     pagePrev.addEventListener("click", () => scrollThumbs(-1));
     pageNext.addEventListener("click", () => scrollThumbs(+1));
 
-    ths.addEventListener("scroll", () => updateThumbFade());
-    window.addEventListener("resize", () => { updateThumbFade(); syncTabsSpace(); }, { passive:true });
+    ths.addEventListener("scroll", () => queueThumbFade());
+    window.addEventListener("resize", () => { queueThumbFade(); syncTabsSpace(); }, { passive:true });
 
     renderTabs();
-
-    function syncTabsSpace(){
-      const h = Math.ceil(tabs.getBoundingClientRect().height || 0);
-      root.style.setProperty("--yana-tabs-space", (h ? (h + 12) : 56) + "px");
-    }
     syncTabsSpace();
+
     if (window.ResizeObserver) {
       const ro = new ResizeObserver(syncTabsSpace);
       ro.observe(tabs);
     }
 
     renderAll();
-    updateThumbFade();
+    queueThumbFade(); // ✅ 初始也要跑一次（但會再等縮圖載入後重算）
 
-    function scrollThumbs(dir){
-      const w = ths.clientWidth || 1;
-      ths.scrollBy({ left: dir * (w * 0.85), behavior:"smooth" });
-      setTimeout(updateThumbFade, 260);
+    function syncTabsSpace(){
+      const h = Math.ceil(tabs.getBoundingClientRect().height || 0);
+      root.style.setProperty("--yana-tabs-space", (h ? (h + 12) : 56) + "px");
+    }
+
+    // ✅ 重點：避免縮圖圖片還沒載入就誤判 overflow
+    let fadeToken = 0;
+    function queueThumbFade(){
+      const token = ++fadeToken;
+
+      // 1) 立刻下一幀算一次
+      requestAnimationFrame(() => {
+        if (token !== fadeToken) return;
+        updateThumbFade();
+      });
+
+      // 2) 再延遲兩次（讓 lazy 圖片/字型/排版完成）
+      setTimeout(() => { if (token === fadeToken) updateThumbFade(); }, 150);
+      setTimeout(() => { if (token === fadeToken) updateThumbFade(); }, 600);
     }
 
     function updateThumbFade(){
       const max = ths.scrollWidth - ths.clientWidth;
       const hasOverflow = max > 6;
+
       ths.classList.toggle("has-fade", hasOverflow);
       ths.classList.toggle("is-centered", !hasOverflow);
 
       pagePrev.disabled = !hasOverflow || ths.scrollLeft <= 2;
       pageNext.disabled = !hasOverflow || ths.scrollLeft >= max - 2;
+    }
+
+    function scrollThumbs(dir){
+      const w = ths.clientWidth || 1;
+      ths.scrollBy({ left: dir * (w * 0.85), behavior:"smooth" });
+      setTimeout(() => queueThumbFade(), 260);
     }
 
     function step(d){
@@ -393,6 +409,7 @@
           ci = idx; ii = 0;
           updateTabSelected();
           renderAll();
+          queueThumbFade();
         });
         tabs.appendChild(b);
       });
@@ -469,12 +486,9 @@
 
       med.appendChild(frame);
 
-      // ✅ 這裡就是「小卡片」：Live2D 會隱藏
+      // 小卡片（Live2D 預設隱藏）
       const catKey = (CATS[ci] && CATS[ci].k) ? CATS[ci].k : "";
-      const hideMeta =
-        (it.hm === true) || (catKey === "live2d");
-        // 如果你也要讓 Game 一起隱藏，把上面改成：
-        // (it.hm === true) || (catKey === "live2d" || catKey === "game");
+      const hideMeta = (it.hm === true) || (catKey === "live2d");
 
       const hasDesc  = !!(it.d && String(it.d).trim());
       const hasLinks = Array.isArray(it.links) && it.links.length;
@@ -537,6 +551,11 @@
           im.alt = it.ti || "";
           im.loading = "lazy";
           im.draggable = false;
+
+          // ✅ 縮圖圖片載入後再重算 overflow（修正你現在的問題）
+          im.addEventListener("load", () => queueThumbFade(), { once:true });
+          im.addEventListener("error", () => queueThumbFade(), { once:true });
+
           b.appendChild(im);
         } else {
           const d = document.createElement("div");
@@ -551,10 +570,13 @@
           renderMedia();
           updateThumbSelected();
           b.scrollIntoView({ behavior:"smooth", inline:"center", block:"nearest" });
+          setTimeout(() => queueThumbFade(), 260);
         });
 
         ths.appendChild(b);
       });
+
+      queueThumbFade(); // ✅ render 完也先算一次
     }
 
     function updateThumbSelected(){
