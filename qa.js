@@ -1,4 +1,4 @@
-// qa.js (FINAL)
+// qa.js (FINAL - uses <p><br> for the "⟡" lines, no <li> in Character Profile)
 (() => {
   const hosts = Array.from(document.querySelectorAll("[data-qa-host]"));
   if (!hosts.length) return;
@@ -6,82 +6,104 @@
   const HTML = `
   <div class="yana-faq" data-qaaccordion data-mode="single">
 
+    <!-- 1) Character Profile -->
     <details>
       <summary>
         <span class="row-left">
           <span class="ic" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
-              <path d="M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-              <path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.9.6-1.7 1.2-1.7 2.2v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M12 22a10 10 0 1 0-10-10 10 10 0 0 0 10 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M4 21a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </span>
+
           <span class="txt lang-tw">角色檔案</span>
           <span class="txt lang-ja">キャラクタープロフィール</span>
           <span class="txt lang-en">Character Profile</span>
         </span>
       </summary>
-<div class="content">
-  <div class="profile-grid">
 
-    <!-- LEFT: text (language switch applies here) -->
-    <div class="profile-text">
-      <div class="lang-tw">
-        <ul class="spark-list">
-          <p>⟡ 173cm、中性、阿努比斯後裔<br>
-          ⟡ 小麥色肌、狼耳、火焰尾巴<br>
-          ⟡ 本體 = 眼鏡・面具<br>
-          ⟡ 守護神獸 = 阿努皮斯（Anu Peace）</p>
-        </ul>
-          <p>▼ 標籤・Tag ▼<br>
-          🎨 #YanaAbyss #やなアビス</p>
-          <p>▼ 其他・Others・その他 ▼<br>
-          中文⭕日本語⭕English⭕</p>
-          </div>
-          
-      <div class="lang-ja">
-        <ul class="spark-list">
-          <li>⟡ 173cm、中性、アヌビスの末裔</li>
-          <li>⟡ 小麦色の肌、狼耳、炎のしっぽ</li>
-          <li>⟡ 本体 = 眼鏡・仮面</li>
-          <li>⟡ 守護神獣 = アヌピス</li>
-        </ul>
+      <div class="content">
+        <div class="profile-grid">
 
-          <p>▼ タグ ▼<br>
-          🎨 #YanaAbyss #やなアビス</p>
-          <p>▼ その他 ▼<br>
-          中国語⭕日本語⭕English⭕</p>
+          <!-- LEFT: text -->
+          <div class="profile-text">
+
+            <div class="lang-tw">
+              <p class="spark-par">
+                ⟡ 173cm、中性、阿努比斯後裔<br>
+                ⟡ 小麥色肌、狼耳、火焰尾巴<br>
+                ⟡ 本體 = 眼鏡・面具<br>
+                ⟡ 守護神獸 = 阿努比斯（Anu Peace）
+              </p>
+
+              <p class="sub-par">
+                ▼ 標籤・Tag ▼<br>
+                🎨 #YanaAbyss #やなアビス
+              </p>
+
+              <p class="sub-par">
+                ▼ 其他・Others・その他 ▼<br>
+                中文⭕日本語⭕English⭕
+              </p>
+            </div>
+
+            <div class="lang-ja">
+              <p class="spark-par">
+                ⟡ 173cm、中性、アヌビスの末裔<br>
+                ⟡ 小麦色の肌、狼耳、炎のしっぽ<br>
+                ⟡ 本体 = 眼鏡・仮面<br>
+                ⟡ 守護神獣 = アヌピス（Anu Peace）
+              </p>
+
+              <p class="sub-par">
+                ▼ タグ ▼<br>
+                🎨 #YanaAbyss #やなアビス
+              </p>
+
+              <p class="sub-par">
+                ▼ その他 ▼<br>
+                中国語⭕日本語⭕English⭕
+              </p>
+            </div>
+
+            <div class="lang-en">
+              <p class="spark-par">
+                ⟡ 173 cm / Neutral / Descendant of Anubis<br>
+                ⟡ Tanned skin / Wolf ears / Flame tail<br>
+                ⟡ Noumenon = Glasses, Mask<br>
+                ⟡ Guardian Beast = Anu Peace
+              </p>
+
+              <p class="sub-par">
+                ▼ Tags ▼<br>
+                🎨 #YanaAbyss #やなアビス
+              </p>
+
+              <p class="sub-par">
+                ▼ Other ▼<br>
+                Mandarin / Japanese / English
+              </p>
+            </div>
+
           </div>
 
-      <div class="lang-en">
-        <ul class="spark-list">
-          <li>⟡ 173 cm / Neutral / Descendant of Anubis</li>
-          <li>⟡ Tanned skin / Wolf ears / Flame tail</li>
-          <li>⟡ Noumenon = Glasses, Mask</li>
-          <li>⟡ Guardian Beast = Anu Peace</li>
-        </ul>
-          <p>▼ Tags ▼<br>
-          🎨 #YanaAbyss #やなアビス</p>
-          <p>▼ Other ▼<br>
-          Mandarin / Japanese / English</p>
+          <!-- RIGHT: photos -->
+          <div class="profile-media">
+            <div class="media-grid">
+              <img src="https://YOUR_IMAGE_URL_1.png" alt="Character Photo 1">
+              <img src="https://YOUR_IMAGE_URL_2.png" alt="Character Photo 2">
+            </div>
+
+            <!-- 單張版本（要單張就把上面 media-grid 刪掉，改用這行） -->
+            <!-- <img src="https://YOUR_IMAGE_URL.png" alt="Character Photo"> -->
           </div>
+
+        </div>
       </div>
-    <!-- RIGHT: photos -->
-    <div class="profile-media">
-      <!-- 兩張圖並排（像你畫的中間切一半） -->
-      <div class="media-grid">
-        <img src="https://YOUR_IMAGE_URL_1.png" alt="Character Photo 1">
-        <img src="https://YOUR_IMAGE_URL_2.png" alt="Character Photo 2">
-      </div>
+    </details>
 
-      <!-- 只想放一張就改成這樣（刪掉上面 media-grid） -->
-      <!-- <img src="https://YOUR_IMAGE_URL.png" alt="Character Photo"> -->
-    </div>
-
-  </div>
-</div>
-
-  <!-- 2) WORK PROCESS -->
+    <!-- 2) WORK PROCESS -->
     <details>
       <summary>
         <span class="row-left">
@@ -96,6 +118,7 @@
           <span class="txt lang-en">WORK PROCESS</span>
         </span>
       </summary>
+
       <div class="content">
         <div class="lang-tw">
           <ol>
@@ -110,6 +133,7 @@
       </div>
     </details>
 
+    <!-- 3) PRICE -->
     <details>
       <summary>
         <span class="row-left">
@@ -124,6 +148,7 @@
           <span class="txt lang-en">PRICE</span>
         </span>
       </summary>
+
       <div class="content">
         <div class="lang-tw">
           <ul>
@@ -137,6 +162,7 @@
       </div>
     </details>
 
+    <!-- 4) TERMS OF SERVICE -->
     <details>
       <summary>
         <span class="row-left">
@@ -152,6 +178,7 @@
           <span class="txt lang-en">TERMS OF SERVICE</span>
         </span>
       </summary>
+
       <div class="content">
         <div class="lang-tw">
           <ul>
@@ -169,17 +196,15 @@
   </div>
   `;
 
-  // 你指定的縮放 CFG
   const CFG = {
     minW: 260, maxW: 520,
     minFS: 12, maxFS: 15,
     minLS: 0.06, maxLS: 0.09,
-    // 這兩個用來讓 row spacing / icon 跟著縮放更穩（不影響你指定的 FS/LS）
     minPY: 12, maxPY: 16,
     minIC: 14, maxIC: 16
   };
 
-  const clamp = (n,a,b) => Math.max(a, Math.min(b,n));
+  const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
   function applyScale(root){
     const w = root.getBoundingClientRect().width;
@@ -204,7 +229,6 @@
     const root = host.querySelector("[data-qaaccordion]");
     if (!root) return;
 
-    // resize scaling
     const onResize = () => requestAnimationFrame(() => applyScale(root));
     applyScale(root);
 
