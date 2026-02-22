@@ -21,47 +21,65 @@
           <span class="txt lang-en">Character Profile</span>
         </span>
       </summary>
-      <div class="content">
-          <div class="lang-tw">
-          <p>⟡ 173cm、中性、阿努比斯後裔<br>
-          ⟡ 小麥色肌、狼耳、火焰尾巴<br>
-          ⟡ 本體 = 眼鏡・面具<br>
-          ⟡ 守護神獸 = 阿努皮斯</p>
+<div class="content">
+  <div class="profile-grid">
 
+    <!-- LEFT: text (language switch applies here) -->
+    <div class="profile-text">
+      <div class="lang-tw">
+        <ul class="spark-list">
+          <li>⟡ 173cm、中性、阿努比斯後裔</li>
+          <li>⟡ 小麥色肌、狼耳、火焰尾巴</li>
+          <li>⟡ 本體 = 眼鏡・面具</li>
+          <li>⟡ 守護神獸 = 阿努皮斯（Anu Peace）</li>
+        </ul>
           <p>▼ 標籤・Tag ▼<br>
           🎨 #YanaAbyss #やなアビス</p>
-
           <p>▼ 其他・Others・その他 ▼<br>
           中文⭕日本語⭕English⭕</p>
           </div>
           
-         <div class="lang-ja">
-          <p>⟡ 173cm、中性、アヌビスの末裔<br>
-          ⟡ 小麦色の肌、狼耳、炎のしっぽ<br>
-          ⟡ 本体 = 眼鏡・仮面<br>
-          ⟡ 守護神獣 = アヌピス</p>
+      <div class="lang-ja">
+        <ul class="spark-list">
+          <li>⟡ 173cm、中性、アヌビスの末裔</li>
+          <li>⟡ 小麦色の肌、狼耳、炎のしっぽ</li>
+          <li>⟡ 本体 = 眼鏡・仮面</li>
+          <li>⟡ 守護神獣 = アヌピス</li>
+        </ul>
 
           <p>▼ タグ ▼<br>
           🎨 #YanaAbyss #やなアビス</p>
-
           <p>▼ その他 ▼<br>
           中国語⭕日本語⭕English⭕</p>
           </div>
 
-          <div class="lang-en">
-          <p>⟡ 173 cm / Neutral / Descendant of Anubis<br>
-          ⟡ Tanned skin / Wolf ears / Flame tail<br>
-          ⟡ Noumenon = Glasses, Mask<br>
-          ⟡ Guardian Beast = Anu Peace</p>
-
+      <div class="lang-en">
+        <ul class="spark-list">
+          <li>⟡ 173 cm / Neutral / Descendant of Anubis</li>
+          <li>⟡ Tanned skin / Wolf ears / Flame tail</li>
+          <li>⟡ Noumenon = Glasses, Mask</li>
+          <li>⟡ Guardian Beast = Anu Peace</li>
+        </ul>
           <p>▼ Tags ▼<br>
           🎨 #YanaAbyss #やなアビス</p>
-
           <p>▼ Other ▼<br>
           Mandarin / Japanese / English</p>
           </div>
       </div>
-    </details>
+    <!-- RIGHT: photos -->
+    <div class="profile-media">
+      <!-- 兩張圖並排（像你畫的中間切一半） -->
+      <div class="media-grid">
+        <img src="https://YOUR_IMAGE_URL_1.png" alt="Character Photo 1">
+        <img src="https://YOUR_IMAGE_URL_2.png" alt="Character Photo 2">
+      </div>
+
+      <!-- 只想放一張就改成這樣（刪掉上面 media-grid） -->
+      <!-- <img src="https://YOUR_IMAGE_URL.png" alt="Character Photo"> -->
+    </div>
+
+  </div>
+</div>
 
   <!-- 2) WORK PROCESS -->
     <details>
