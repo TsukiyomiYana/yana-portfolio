@@ -1,5 +1,3 @@
-/* qa.css (FINAL) */
-
 /* 字體強制套到所有子元素（避免 Carrd 覆蓋） */
 [data-qaaccordion],
 [data-qaaccordion] *{
@@ -31,7 +29,7 @@
 }
 
 /* ===== SUMMARY（標題列）===== */
-/* 這裡做「標題視覺置中」，箭頭固定右側 */
+/* 標題視覺置中，箭頭固定右側 */
 [data-qaaccordion] summary{
   list-style: none;
   cursor: pointer;
@@ -46,7 +44,7 @@
   position: relative;       /* 讓箭頭 absolute */
   user-select: none;
 
-  /* 不要動 text-align，避免影響外層 Container 的布局 */
+  /* 不動 text-align，避免影響外層 Container 的布局 */
 }
 [data-qaaccordion] summary::-webkit-details-marker{ display:none; }
 
@@ -137,7 +135,7 @@
   border: 1px solid rgba(0,0,0,.06);
 }
 
-/* ===== LANGUAGE SWITCH（沿用你現有 data-lang）===== */
+/* ===== LANGUAGE SWITCH ===== */
 :root[data-lang="tw"] [data-qaaccordion] .lang-ja,
 :root[data-lang="tw"] [data-qaaccordion] .lang-en{ display:none !important; }
 
@@ -146,3 +144,66 @@
 
 :root[data-lang="en"] [data-qaaccordion] .lang-tw,
 :root[data-lang="en"] [data-qaaccordion] .lang-ja{ display:none !important; }
+
+/* ===== Character Profile: text-left / photo-right layout ===== */
+[data-qaaccordion] .profile-grid{
+  display: grid;
+  grid-template-columns: 1.1fr 1fr; /* 左邊文字稍寬 */
+  gap: 18px;
+  align-items: start;
+}
+
+/* 左邊文字 */
+[data-qaaccordion] .profile-text{
+  min-width: 0;
+}
+
+/* 右邊照片區：可放 1~2 張 */
+[data-qaaccordion] .profile-media{
+  min-width: 0;
+}
+
+/* 兩張照片並排（你圖上那種中間切一半） */
+[data-qaaccordion] .media-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* 單張照片就不用 media-grid，直接放 img 也可以 */
+[data-qaaccordion] .profile-media img{
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+/* 如果你想右邊照片固定高度像「卡片」：開啟下面這段（可選） */
+/*
+[data-qaaccordion] .profile-media img{
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+*/
+
+/* 讓你那種「⟡」看起來更像條列 */
+[data-qaaccordion] .spark-list{
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+[data-qaaccordion] .spark-list li{
+  margin: 6px 0 !important;
+}
+
+/* 手機：改成上下排（文字在上，照片在下） */
+@media (max-width: 520px){
+  [data-qaaccordion] .profile-grid{
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  [data-qaaccordion] .media-grid{
+    grid-template-columns: 1fr 1fr; /* 手機也可保留兩張並排，想改一張一排就改成 1fr */
+  }
+}
