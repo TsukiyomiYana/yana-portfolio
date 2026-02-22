@@ -28,10 +28,10 @@
     <div class="profile-text">
       <div class="lang-tw">
         <ul class="spark-list">
-          <li>⟡ 173cm、中性、阿努比斯後裔</li>
-          <li>⟡ 小麥色肌、狼耳、火焰尾巴</li>
-          <li>⟡ 本體 = 眼鏡・面具</li>
-          <li>⟡ 守護神獸 = 阿努皮斯（Anu Peace）</li>
+          <p>⟡ 173cm、中性、阿努比斯後裔<br>
+          ⟡ 小麥色肌、狼耳、火焰尾巴<br>
+          ⟡ 本體 = 眼鏡・面具<br>
+          ⟡ 守護神獸 = 阿努皮斯（Anu Peace）</p>
         </ul>
           <p>▼ 標籤・Tag ▼<br>
           🎨 #YanaAbyss #やなアビス</p>
