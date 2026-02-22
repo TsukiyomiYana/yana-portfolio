@@ -1,4 +1,4 @@
-// qa.js
+// qa.js (FINAL)
 (() => {
   const hosts = Array.from(document.querySelectorAll("[data-qa-host]"));
   if (!hosts.length) return;
@@ -122,12 +122,14 @@
   </div>
   `;
 
+  // 你指定的縮放 CFG
   const CFG = {
-    minW: 280, maxW: 900,
-    minFS: 14, maxFS: 18,
-    minLS: 0.04, maxLS: 0.08,
-    minPY: 12, maxPY: 18,
-    minIC: 14, maxIC: 18
+    minW: 260, maxW: 520,
+    minFS: 12, maxFS: 15,
+    minLS: 0.06, maxLS: 0.09,
+    // 這兩個用來讓 row spacing / icon 跟著縮放更穩（不影響你指定的 FS/LS）
+    minPY: 12, maxPY: 16,
+    minIC: 14, maxIC: 16
   };
 
   const clamp = (n,a,b) => Math.max(a, Math.min(b,n));
