@@ -1,4 +1,6 @@
-/* qa.css */
+/* qa.css (FINAL) */
+
+/* 字體強制套到所有子元素（避免 Carrd 覆蓋） */
 [data-qaaccordion],
 [data-qaaccordion] *{
   font-family: "Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif !important;
@@ -6,89 +8,136 @@
   letter-spacing: inherit !important;
 }
 
+/* 根節點：只控制字級/字距變數，避免影響整塊置中 */
 [data-qaaccordion]{
-  --fs: 16px;
-  --ls: 0.06em;
-  --py: 16px;
-  --ic: 16px;
+  --fs: 15px;    /* JS 會更新 */
+  --ls: 0.09em;  /* JS 會更新 */
+  --py: 14px;    /* JS 會更新 */
+  --ic: 16px;    /* JS 會更新 */
 
   font-size: var(--fs) !important;
   letter-spacing: var(--ls) !important;
-  color: rgba(0,0,0,.62);
+
   width: 100%;
+  color: #3E3127; /* 內文基準色 */
 }
 
-[data-qaaccordion] details{ border-bottom: 1px solid rgba(0,0,0,.06); }
-[data-qaaccordion] details:last-child{ border-bottom: 0; }
+/* 列分隔線（像 settings list） */
+[data-qaaccordion] details{
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+[data-qaaccordion] details:last-child{
+  border-bottom: 0;
+}
 
+/* ===== SUMMARY（標題列）===== */
+/* 這裡做「標題視覺置中」，箭頭固定右側 */
 [data-qaaccordion] summary{
   list-style: none;
   cursor: pointer;
+
   padding: var(--py) 0;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  user-select:none;
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;  /* 置中標題 */
+
+  position: relative;       /* 讓箭頭 absolute */
+  user-select: none;
+
+  /* 不要動 text-align，避免影響外層 Container 的布局 */
 }
 [data-qaaccordion] summary::-webkit-details-marker{ display:none; }
 
+/* 左側 icon + 標題：仍然是同一組，但整體被 summary 置中 */
 [data-qaaccordion] .row-left{
-  display:inline-flex;
-  align-items:center;
-  gap:12px;
-  min-width:0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-width: 0;
+
+  /* 給右邊箭頭預留空間，避免標題被箭頭擠偏 */
+  padding-right: 18px;
 }
 
+/* icon */
 [data-qaaccordion] .ic{
   width: var(--ic);
   height: var(--ic);
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  color: rgba(0,0,0,.45);
-  flex:0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: rgba(58,47,42,.55);
+  flex: 0 0 auto;
 }
 [data-qaaccordion] .ic svg{ width:100%; height:100%; display:block; }
 
+/* 標題文字 */
 [data-qaaccordion] .txt{
-  font-weight:650;
-  color: rgba(0,0,0,.62);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
+  font-weight: 650;
+  color: #3A2F2A !important; /* 標題色 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
+/* 箭頭：固定在右側，不參與置中排版 */
 [data-qaaccordion] summary::after{
   content:"";
-  width:9px; height:9px;
-  border-right:2px solid rgba(0,0,0,.28);
-  border-bottom:2px solid rgba(0,0,0,.28);
-  transform: rotate(45deg);
+  width: 9px;
+  height: 9px;
+
+  border-right: 2px solid rgba(58,47,42,.55);
+  border-bottom: 2px solid rgba(58,47,42,.55);
+
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
   transition: transform .18s ease;
-  flex:0 0 auto;
-  margin-left:12px;
 }
-[data-qaaccordion] details[open] summary::after{ transform: rotate(-135deg); }
-[data-qaaccordion] details[open] .txt{ color: rgba(0,0,0,.70); }
 
+/* 展開後箭頭轉向 */
+[data-qaaccordion] details[open] summary::after{
+  transform: translateY(-50%) rotate(-135deg);
+}
+
+/* hover/open 狀態（保持低對比） */
+[data-qaaccordion] summary:hover{ opacity: .92; }
+
+/* ===== CONTENT（內文區）===== */
+/* 只有內文靠左 */
 [data-qaaccordion] .content{
+  text-align: left !important;
+  color: #3E3127 !important;
+
+  /* 讓內文在視覺上對齊標題文字（略過 icon 的寬度） */
   padding: 0 0 calc(var(--py) + 2px) calc(var(--ic) + 24px);
-  color: rgba(0,0,0,.55);
-  line-height: 1.75;
-  font-size: calc(var(--fs) - 1px) !important;
-  letter-spacing: calc(var(--ls) * 0.7) !important;
+
+  line-height: 1.75 !important;
+  font-size: inherit !important;          /* 內文字級完全跟 CFG */
+  letter-spacing: inherit !important;     /* 內文字距完全跟 CFG */
 }
 
+[data-qaaccordion] .content p{ margin: 10px 0 !important; }
+[data-qaaccordion] .content ul,
+[data-qaaccordion] .content ol{ margin: 10px 0 10px 18px !important; }
+[data-qaaccordion] .content li{ margin: 6px 0 !important; }
+
+/* 內容圖片 */
 [data-qaaccordion] .content img{
-  width:100%;
-  height:auto;
-  display:block;
-  border-radius:14px;
-  margin:12px 0;
-  border:1px solid rgba(0,0,0,.06);
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  margin: 12px 0;
+  border: 1px solid rgba(0,0,0,.06);
 }
 
-/* 三語切換（沿用你的 data-lang） */
+/* ===== LANGUAGE SWITCH（沿用你現有 data-lang）===== */
 :root[data-lang="tw"] [data-qaaccordion] .lang-ja,
 :root[data-lang="tw"] [data-qaaccordion] .lang-en{ display:none !important; }
 
