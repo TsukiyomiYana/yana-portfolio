@@ -16,25 +16,54 @@
               <path d="M12 22a10 10 0 1 0-10-10 10 10 0 0 0 10 10Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
             </svg>
           </span>
-          <span class="txt lang-tw">Q&amp;A</span>
-          <span class="txt lang-ja">Q&amp;A</span>
-          <span class="txt lang-en">Q&amp;A</span>
+          <span class="txt lang-tw">角色檔案</span>
+          <span class="txt lang-ja">キャラクタープロフィール</span>
+          <span class="txt lang-en">Character Profile</span>
         </span>
       </summary>
       <div class="content">
-        <div class="lang-tw">
-          <p>在這裡放常見問題。</p>
-          <ul>
-            <li>我接哪些類型的委託？</li>
-            <li>需要提供哪些資料？</li>
-            <li>交期怎麼算？</li>
-          </ul>
-        </div>
-        <div class="lang-ja"><p>よくある質問をここにまとめます。</p></div>
-        <div class="lang-en"><p>Put your frequently asked questions here.</p></div>
+          <div class="lang-tw">
+          <p>⟡ 173cm、中性、阿努比斯後裔<br>
+          ⟡ 小麥色肌、狼耳、火焰尾巴<br>
+          ⟡ 本體 = 眼鏡・面具<br>
+          ⟡ 守護神獸 = 阿努皮斯（Anu Peace）</p>
+
+          <p>▼ 標籤・Tag ▼<br>
+          🎨 #YanaAbyss #やなアビス</p>
+
+          <p>▼ 其他・Others・その他 ▼<br>
+          中文⭕日本語⭕English⭕</p>
+          </div>
+          
+         <div class="lang-ja">
+          <p>⟡ 173cm、中性、アヌビスの末裔<br>
+          ⟡ 小麦色の肌、狼耳、炎のしっぽ<br>
+          ⟡ 本体 = 眼鏡・仮面<br>
+          ⟡ 守護神獣 = アヌピス（Anu Peace）</p>
+
+          <p>▼ タグ ▼<br>
+          🎨 #YanaAbyss #やなアビス</p>
+
+          <p>▼ その他 ▼<br>
+          中国語⭕日本語⭕English⭕</p>
+          </div>
+
+          <div class="lang-en">
+          <p>⟡ 173 cm / Neutral / Descendant of Anubis<br>
+          ⟡ Tanned skin / Wolf ears / Flame tail<br>
+          ⟡ Noumenon = Glasses, Mask<br>
+          ⟡ Guardian Beast = Anu Peace</p>
+
+          <p>▼ Tags ▼<br>
+          🎨 #YanaAbyss #やなアビス</p>
+
+          <p>▼ Other ▼<br>
+          Mandarin / Japanese / English</p>
+          </div>
       </div>
     </details>
 
+  <!-- 2) WORK PROCESS -->
     <details>
       <summary>
         <span class="row-left">
