@@ -43,12 +43,10 @@
 
   position: relative;       /* 讓箭頭 absolute */
   user-select: none;
-
-  /* 不動 text-align，避免影響外層 Container 的布局 */
 }
 [data-qaaccordion] summary::-webkit-details-marker{ display:none; }
 
-/* 左側 icon + 標題：仍然是同一組，但整體被 summary 置中 */
+/* 左側 icon + 標題：整體被 summary 置中 */
 [data-qaaccordion] .row-left{
   display: inline-flex;
   align-items: center;
@@ -103,7 +101,7 @@
   transform: translateY(-50%) rotate(-135deg);
 }
 
-/* hover/open 狀態（保持低對比） */
+/* hover */
 [data-qaaccordion] summary:hover{ opacity: .92; }
 
 /* ===== CONTENT（內文區）===== */
@@ -120,12 +118,13 @@
   letter-spacing: inherit !important;     /* 內文字距完全跟 CFG */
 }
 
+/* 一般段落/列表間距 */
 [data-qaaccordion] .content p{ margin: 10px 0 !important; }
 [data-qaaccordion] .content ul,
 [data-qaaccordion] .content ol{ margin: 10px 0 10px 18px !important; }
 [data-qaaccordion] .content li{ margin: 6px 0 !important; }
 
-/* 內容圖片 */
+/* 內容圖片（一般情況） */
 [data-qaaccordion] .content img{
   width: 100%;
   height: auto;
@@ -153,25 +152,21 @@
   align-items: start;
 }
 
-/* 左邊文字 */
-[data-qaaccordion] .profile-text{
-  min-width: 0;
-}
-
-/* 右邊照片區：可放 1~2 張 */
+[data-qaaccordion] .profile-text,
 [data-qaaccordion] .profile-media{
   min-width: 0;
 }
 
-/* 兩張照片並排（你圖上那種中間切一半） */
+/* 兩張照片並排 */
 [data-qaaccordion] .media-grid{
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
-/* 單張照片就不用 media-grid，直接放 img 也可以 */
+/* Character Profile 右側照片：不要被通用 img margin 影響，避免上下多出空白 */
 [data-qaaccordion] .profile-media img{
+  margin: 0 !important;
   width: 100%;
   height: auto;
   display: block;
@@ -179,31 +174,22 @@
   border: 1px solid rgba(0,0,0,.06);
 }
 
-/* 如果你想右邊照片固定高度像「卡片」：開啟下面這段（可選） */
-/*
-[data-qaaccordion] .profile-media img{
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-}
-*/
-
-/* 讓你那種「⟡」看起來更像條列 */
-[data-qaaccordion] .spark-list{
+/* 清單、間距更乾淨 */
+[data-qaaccordion] .spark-par{
   margin: 0 !important;
-  padding: 0 !important;
-  list-style: none !important;
+  line-height: 1.75 !important;
 }
-[data-qaaccordion] .spark-list li{
-  margin: 6px 0 !important;
+[data-qaaccordion] .sub-par{
+  margin: 10px 0 0 0 !important;
 }
 
-/* 手機：改成上下排（文字在上，照片在下） */
+/* 手機：改成上下排 */
 @media (max-width: 520px){
   [data-qaaccordion] .profile-grid{
     grid-template-columns: 1fr;
     gap: 14px;
   }
   [data-qaaccordion] .media-grid{
-    grid-template-columns: 1fr 1fr; /* 手機也可保留兩張並排，想改一張一排就改成 1fr */
+    grid-template-columns: 1fr 1fr; /* 手機也保留兩張並排；想一張一排就改 1fr */
   }
 }
