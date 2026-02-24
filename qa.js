@@ -91,7 +91,7 @@
           <!-- RIGHT: photos -->
           <div class="profile-media">
             <div class="media-grid">
-              <img src="https://YOUR_IMAGE_URL_1.png" alt="Character Photo 1">
+              <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Character Photo 1">
               <img src="https://YOUR_IMAGE_URL_2.png" alt="Character Photo 2">
             </div>
 
