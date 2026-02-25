@@ -609,7 +609,25 @@ body {
     window.addEventListener("resize", applyScale);
   }
 
-  /* ===== 3. Accordion ===== */
+  /* ===== 3. Auto height reporting to parent (fixes iframe cutoff) ===== */
+  function reportHeight(){
+    var h = document.documentElement.scrollHeight;
+    try{
+      window.parent.postMessage({ type: "impornt-height", height: h }, "*");
+    }catch(e){}
+  }
+
+  // Report on load + after any accordion toggle + on resize
+  reportHeight();
+  window.addEventListener("resize", reportHeight);
+
+  // Also observe DOM changes (accordion open/close changes height)
+  if(window.MutationObserver){
+    var mo = new MutationObserver(function(){ requestAnimationFrame(reportHeight); });
+    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+  }
+
+  /* ===== 4. Accordion ===== */
   var items = document.querySelectorAll(".impornt-item");
 
   items.forEach(function(item){
@@ -637,6 +655,9 @@ body {
         item.classList.add("is-open");
         btn.setAttribute("aria-expanded","true");
       }
+
+      // Wait for CSS transition to finish then report new height
+      setTimeout(reportHeight, 350);
     });
   });
 
