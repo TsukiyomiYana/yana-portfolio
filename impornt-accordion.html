@@ -609,23 +609,32 @@ body {
     window.addEventListener("resize", applyScale);
   }
 
-  /* ===== 3. Auto height reporting to parent (fixes iframe cutoff) ===== */
+  /* ===== 3. Auto height: ResizeObserver on <html> → postMessage ===== */
   function reportHeight(){
-    var h = document.documentElement.scrollHeight;
-    try{
-      window.parent.postMessage({ type: "impornt-height", height: h }, "*");
-    }catch(e){}
+    // Use getBoundingClientRect for pixel-accurate height (avoids scrollHeight rounding issues)
+    var h = Math.ceil(document.documentElement.getBoundingClientRect().height);
+    try{ window.parent.postMessage({ type: "impornt-height", height: h }, "*"); }catch(e){}
   }
 
-  // Report on load + after any accordion toggle + on resize
-  reportHeight();
-  window.addEventListener("resize", reportHeight);
-
-  // Also observe DOM changes (accordion open/close changes height)
-  if(window.MutationObserver){
-    var mo = new MutationObserver(function(){ requestAnimationFrame(reportHeight); });
-    mo.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+  // ResizeObserver on <html>: fires whenever content height changes (accordion, font load, resize)
+  if(window.ResizeObserver){
+    var heightRO = new ResizeObserver(function(){ reportHeight(); });
+    heightRO.observe(document.documentElement);
+  } else {
+    // Fallback for old browsers
+    window.addEventListener("resize", reportHeight);
+    if(window.MutationObserver){
+      var mo = new MutationObserver(function(){ requestAnimationFrame(reportHeight); });
+      mo.observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:["class"] });
+    }
   }
+
+  // Aggressive early polling: fires every 80ms for first 2s (covers font-load & first paint)
+  var _polls = 0;
+  var _pollTimer = setInterval(function(){
+    reportHeight();
+    if(++_polls >= 25) clearInterval(_pollTimer);
+  }, 80);
 
   /* ===== 4. Accordion ===== */
   var items = document.querySelectorAll(".impornt-item");
@@ -655,9 +664,7 @@ body {
         item.classList.add("is-open");
         btn.setAttribute("aria-expanded","true");
       }
-
-      // Wait for CSS transition to finish then report new height
-      setTimeout(reportHeight, 350);
+      // ResizeObserver will automatically report height changes during transition
     });
   });
 
