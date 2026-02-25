@@ -198,12 +198,3 @@
     grid-template-columns: 1fr 1fr; /* 想一張一排就改 1fr */
   }
 }
-
-/* ✅ 防止 Carrd / theme 把 p、li 用 em 放大（你現在 12.38 → 16.9 就是這種倍率） */
-[data-qaaccordion] .content p,
-[data-qaaccordion] .content li,
-[data-qaaccordion] .content ul,
-[data-qaaccordion] .content ol{
-  font-size: 1em !important;        /* 1em = 跟 [data-qaaccordion] 的 font-size 一樣 */
-  letter-spacing: inherit !important;
-}
