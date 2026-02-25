@@ -206,13 +206,11 @@
 
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-  // host = 量寬用（Carrd 直接放的容器，layout 最穩）
-  // root = 套 CSS 變數用（[data-qaaccordion]）
+  // 跟 hero/sched/bio 一致：直接用 window.innerWidth 量寬
+  // 避免 Carrd embed wrapper 結構不同導致容器寬抓錯
   function applyScale(host, root){
-    const w = host.getBoundingClientRect().width;
-    // 如果 host 還沒 layout（寬度為 0），fallback 用視窗寬
-    const safeW = w > 0 ? w : window.innerWidth;
-    const t = clamp((safeW - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
+    const w = window.innerWidth;
+    const t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
 
     const fs = CFG.minFS + (CFG.maxFS - CFG.minFS) * t;
     const ls = CFG.minLS + (CFG.maxLS - CFG.minLS) * t;
@@ -235,17 +233,12 @@
 
     const onResize = () => requestAnimationFrame(() => applyScale(host, root));
 
-    // setTimeout(0)：等 Carrd 把 embed wrapper 完整 layout 後再量寬
-    // 避免首次執行時 getBoundingClientRect() 拿到 0
+    // setTimeout(0)：等 Carrd layout 完成後再執行首次 scale
     setTimeout(() => applyScale(host, root), 0);
 
-    if (window.ResizeObserver){
-      const ro = new ResizeObserver(onResize);
-      // 觀察 host（Carrd 的容器），感應更穩定
-      ro.observe(host);
-    } else {
-      window.addEventListener("resize", onResize);
-    }
+    // 用 window resize 監聽，跟 hero/sched/bio 行為一致
+    // 不依賴容器寬，避免 Carrd embed wrapper 結構差異造成問題
+    window.addEventListener("resize", onResize);
 
     // single-open
     const items = Array.from(root.querySelectorAll("details"));
