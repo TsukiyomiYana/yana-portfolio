@@ -195,8 +195,8 @@
 
   // ✅ 絕對字級範圍：不再受外層 font-size 影響
   const CFG = {
-    minW: 260, maxW: 1200,
-    minFS: 11.5, maxFS: 13.2,
+    minW: 200, maxW: 800,
+    minFS: 12, maxFS: 13,
     minLS: 0.06, maxLS: 0.09,
     minPY: 12, maxPY: 16,
     minIC: 14, maxIC: 16
