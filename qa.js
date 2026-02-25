@@ -191,12 +191,16 @@
   `;
 
   const CFG = {
-    minW: 260, maxW: 520,
-    minFS: 12, maxFS: 15,
-    minLS: 0.06, maxLS: 0.09,
-    minPY: 12, maxPY: 16,
-    minIC: 14, maxIC: 16
-  };
+  // 讓 QA 不會太快打到最大字級：
+  // maxW 拉大 + maxFS 降低 = 寬的區塊也不會變超大
+  minW: 260, maxW: 700,
+  minFS: 11.5, maxFS: 13.5,
+  minLS: 0.06, maxLS: 0.09,
+
+  // spacing 仍照你原本
+  minPY: 12, maxPY: 16,
+  minIC: 14, maxIC: 16
+};
 
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
