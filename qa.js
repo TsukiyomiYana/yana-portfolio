@@ -1,4 +1,4 @@
-// qa.js (FINAL - uses <p><br> for the "⟡" lines, no <li> in Character Profile)
+// qa.js (FINAL - force smaller typography deterministically)
 (() => {
   const hosts = Array.from(document.querySelectorAll("[data-qa-host]"));
   if (!hosts.length) return;
@@ -94,9 +94,6 @@
               <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Tsukiyomi Yana Photo ID">
               <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu Photo ID">
             </div>
-
-            <!-- 單張版本（要單張就把上面 media-grid 刪掉，改用這行） -->
-            <!-- <img src="https://YOUR_IMAGE_URL.png" alt="Character Photo"> -->
           </div>
 
         </div>
@@ -196,40 +193,36 @@
   </div>
   `;
 
-const CFG = {
-  // 把 maxW 拉大，避免桌機寬度直接 t=1
-  minW: 260, maxW: 1200,
-
-  // 把 maxFS 壓低，確保不會比你上方區塊大
-  minFS: 11.5, maxFS: 13.2,
-
-  minLS: 0.06, maxLS: 0.09,
-  minPY: 12, maxPY: 16,
-  minIC: 14, maxIC: 16
-};
+  // ✅ 絕對字級範圍：不再受外層 font-size 影響
+  const CFG = {
+    minW: 260, maxW: 1200,
+    minFS: 11.5, maxFS: 13.2,
+    minLS: 0.06, maxLS: 0.09,
+    minPY: 12, maxPY: 16,
+    minIC: 14, maxIC: 16
+  };
 
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-  function applyScale(root, host){
-  const w = root.getBoundingClientRect().width;
-  const t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
+  function applyScale(root){
+    const w = root.getBoundingClientRect().width;
+    const t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
 
-  // 讀取外層容器字級（跟你的 COMMISSIONS 那區一致）
-  const baseFS = parseFloat(getComputedStyle(host).fontSize) || 13;
+    const fs = CFG.minFS + (CFG.maxFS - CFG.minFS) * t;
+    const ls = CFG.minLS + (CFG.maxLS - CFG.minLS) * t;
+    const py = CFG.minPY + (CFG.maxPY - CFG.minPY) * t;
+    const ic = CFG.minIC + (CFG.maxIC - CFG.minIC) * t;
 
-  // 只在 baseFS 以下微調（最大不超過 baseFS）
-  const minScale = 0.92, maxScale = 1.00;
-  const fs = baseFS * (minScale + (maxScale - minScale) * t);
+    // 變數給 padding/icon 用（你的 qa.css 會吃）
+    root.style.setProperty("--fs", fs.toFixed(2) + "px");
+    root.style.setProperty("--ls", ls.toFixed(3) + "em");
+    root.style.setProperty("--py", py.toFixed(2) + "px");
+    root.style.setProperty("--ic", ic.toFixed(2) + "px");
 
-  const ls = CFG.minLS + (CFG.maxLS - CFG.minLS) * t;
-  const py = CFG.minPY + (CFG.maxPY - CFG.minPY) * t;
-  const ic = CFG.minIC + (CFG.maxIC - CFG.minIC) * t;
-
-  root.style.setProperty("--fs", fs.toFixed(2) + "px");
-  root.style.setProperty("--ls", ls.toFixed(3) + "em");
-  root.style.setProperty("--py", py.toFixed(2) + "px");
-  root.style.setProperty("--ic", ic.toFixed(2) + "px");
-}
+    // ✅ 直接強制字級/字距（inline !important），避免任何 CSS 干擾
+    root.style.setProperty("font-size", fs.toFixed(2) + "px", "important");
+    root.style.setProperty("letter-spacing", ls.toFixed(3) + "em", "important");
+  }
 
   function mount(host){
     if (host.dataset.mounted === "1") return;
@@ -239,15 +232,15 @@ const CFG = {
     const root = host.querySelector("[data-qaaccordion]");
     if (!root) return;
 
-    const onResize = () => requestAnimationFrame(() => applyScale(root, host));
-applyScale(root, host);
+    const onResize = () => requestAnimationFrame(() => applyScale(root));
 
-    // setTimeout(0)：等 Carrd layout 完成後再執行首次 scale
-    setTimeout(() => applyScale(host, root), 0);
+    // 先跑一次 + 下一幀再跑一次（等 Carrd layout 完成）
+    applyScale(root);
+    setTimeout(() => applyScale(root), 0);
 
-    // ResizeObserver 觀察 host，視窗縮放時同步更新字體
     if (window.ResizeObserver){
-      new ResizeObserver(onResize).observe(host);
+      const ro = new ResizeObserver(onResize);
+      ro.observe(root);
     } else {
       window.addEventListener("resize", onResize);
     }
