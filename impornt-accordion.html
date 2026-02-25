@@ -609,32 +609,33 @@ body {
     window.addEventListener("resize", applyScale);
   }
 
-  /* ===== 3. Auto height: ResizeObserver on <html> → postMessage ===== */
+  /* ===== 3. Auto height: content-only, no feedback loop ===== */
+  var _lastH = 0;
+
   function reportHeight(){
-    // Use getBoundingClientRect for pixel-accurate height (avoids scrollHeight rounding issues)
-    var h = Math.ceil(document.documentElement.getBoundingClientRect().height);
+    // Measure the actual content wrapper, NOT <html> or <body>
+    // This way the iframe growing doesn't re-trigger the observer
+    var el = document.getElementById("imporntRoot");
+    if(!el) return;
+    var h = Math.ceil(el.getBoundingClientRect().height) + 48; // 48px = top+bottom padding
+    if(h === _lastH) return; // no change → don't send → no loop
+    _lastH = h;
     try{ window.parent.postMessage({ type: "impornt-height", height: h }, "*"); }catch(e){}
   }
 
-  // ResizeObserver on <html>: fires whenever content height changes (accordion, font load, resize)
-  if(window.ResizeObserver){
-    var heightRO = new ResizeObserver(function(){ reportHeight(); });
-    heightRO.observe(document.documentElement);
+  // Observe only the content wrapper (not <html>/<body>), so iframe resize doesn't retrigger
+  var _root = document.getElementById("imporntRoot");
+  if(window.ResizeObserver && _root){
+    var heightRO = new ResizeObserver(function(){ requestAnimationFrame(reportHeight); });
+    heightRO.observe(_root);
   } else {
-    // Fallback for old browsers
     window.addEventListener("resize", reportHeight);
-    if(window.MutationObserver){
-      var mo = new MutationObserver(function(){ requestAnimationFrame(reportHeight); });
-      mo.observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:["class"] });
-    }
   }
 
-  // Aggressive early polling: fires every 80ms for first 2s (covers font-load & first paint)
-  var _polls = 0;
-  var _pollTimer = setInterval(function(){
-    reportHeight();
-    if(++_polls >= 25) clearInterval(_pollTimer);
-  }, 80);
+  // Initial report after fonts/layout settle
+  setTimeout(reportHeight, 100);
+  setTimeout(reportHeight, 500);
+  setTimeout(reportHeight, 1200);
 
   /* ===== 4. Accordion ===== */
   var items = document.querySelectorAll(".impornt-item");
