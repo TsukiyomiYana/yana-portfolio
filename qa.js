@@ -1,8 +1,5 @@
-// qa.js (FINAL - uses <p><br> for the "⟡" lines, no <li> in Character Profile)
+// qa.js (ROBUST BOOT - retries + MutationObserver; content same as your current file)
 (() => {
-  const hosts = Array.from(document.querySelectorAll("[data-qa-host]"));
-  if (!hosts.length) return;
-
   const HTML = `
   <div class="yana-faq" data-qaaccordion data-mode="single">
 
@@ -94,9 +91,6 @@
               <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Tsukiyomi Yana Photo ID">
               <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu Photo ID">
             </div>
-
-            <!-- 單張版本（要單張就把上面 media-grid 刪掉，改用這行） -->
-            <!-- <img src="https://YOUR_IMAGE_URL.png" alt="Character Photo"> -->
           </div>
 
         </div>
@@ -222,12 +216,12 @@
   }
 
   function mount(host){
-    if (host.dataset.mounted === "1") return;
+    if (!host || host.dataset.mounted === "1") return false;
     host.dataset.mounted = "1";
     host.innerHTML = HTML;
 
     const root = host.querySelector("[data-qaaccordion]");
-    if (!root) return;
+    if (!root) return false;
 
     const onResize = () => requestAnimationFrame(() => applyScale(root));
     applyScale(root);
@@ -239,7 +233,6 @@
       window.addEventListener("resize", onResize);
     }
 
-    // single-open
     const items = Array.from(root.querySelectorAll("details"));
     items.forEach(d => {
       d.addEventListener("toggle", () => {
@@ -247,7 +240,35 @@
         items.forEach(o => { if(o !== d) o.open = false; });
       });
     });
+
+    return true;
   }
 
-  hosts.forEach(mount);
+  function mountAll(){
+    const hosts = Array.from(document.querySelectorAll("[data-qa-host]"));
+    if (!hosts.length) return 0;
+    let n = 0;
+    hosts.forEach(h => { if (mount(h)) n++; });
+    return n;
+  }
+
+  // 1) immediate try
+  mountAll();
+
+  // 2) DOMContentLoaded try
+  document.addEventListener("DOMContentLoaded", () => mountAll(), { once: true });
+
+  // 3) retry a few times (Carrd sometimes injects late)
+  let tries = 0;
+  const timer = setInterval(() => {
+    tries++;
+    mountAll();
+    if (tries >= 10) clearInterval(timer);
+  }, 300);
+
+  // 4) MutationObserver (if host is added later)
+  if (document.body && window.MutationObserver){
+    const mo = new MutationObserver(() => mountAll());
+    mo.observe(document.body, { childList: true, subtree: true });
+  }
 })();
