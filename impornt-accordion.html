@@ -609,33 +609,22 @@ body {
     window.addEventListener("resize", applyScale);
   }
 
-  /* ===== 3. Auto height: content-only, no feedback loop ===== */
+  /* ===== 3. Auto height: report ONLY at explicit moments, no observers ===== */
   var _lastH = 0;
-
   function reportHeight(){
-    // Measure the actual content wrapper, NOT <html> or <body>
-    // This way the iframe growing doesn't re-trigger the observer
     var el = document.getElementById("imporntRoot");
     if(!el) return;
-    var h = Math.ceil(el.getBoundingClientRect().height) + 48; // 48px = top+bottom padding
-    if(h === _lastH) return; // no change → don't send → no loop
+    var h = Math.ceil(el.offsetHeight) + 32;
+    if(h === _lastH) return;
     _lastH = h;
-    try{ window.parent.postMessage({ type: "impornt-height", height: h }, "*"); }catch(e){}
+    try{ window.parent.postMessage({ type:"impornt-height", height:h }, "*"); }catch(e){}
   }
 
-  // Observe only the content wrapper (not <html>/<body>), so iframe resize doesn't retrigger
-  var _root = document.getElementById("imporntRoot");
-  if(window.ResizeObserver && _root){
-    var heightRO = new ResizeObserver(function(){ requestAnimationFrame(reportHeight); });
-    heightRO.observe(_root);
-  } else {
-    window.addEventListener("resize", reportHeight);
-  }
-
-  // Initial report after fonts/layout settle
-  setTimeout(reportHeight, 100);
-  setTimeout(reportHeight, 500);
-  setTimeout(reportHeight, 1200);
+  // Only fire at safe explicit moments — never on resize/observe
+  setTimeout(reportHeight, 0);
+  setTimeout(reportHeight, 300);
+  setTimeout(reportHeight, 800);
+  setTimeout(reportHeight, 1500);
 
   /* ===== 4. Accordion ===== */
   var items = document.querySelectorAll(".impornt-item");
@@ -665,7 +654,8 @@ body {
         item.classList.add("is-open");
         btn.setAttribute("aria-expanded","true");
       }
-      // ResizeObserver will automatically report height changes during transition
+      // Report after CSS transition ends (~320ms)
+      setTimeout(reportHeight, 350);
     });
   });
 
