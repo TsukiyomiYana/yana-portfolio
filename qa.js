@@ -206,10 +206,10 @@
 
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-  // 跟 hero/sched/bio 一致：直接用 window.innerWidth 量寬
-  // 避免 Carrd embed wrapper 結構不同導致容器寬抓錯
+  // 量 host 容器寬（跟 comms/sched/bio 量各自元素寬的邏輯一致）
+  // offsetWidth 比 getBoundingClientRect 更早在 layout 後可用
   function applyScale(host, root){
-    const w = window.innerWidth;
+    const w = host.offsetWidth || host.getBoundingClientRect().width || 300;
     const t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
 
     const fs = CFG.minFS + (CFG.maxFS - CFG.minFS) * t;
@@ -236,9 +236,12 @@
     // setTimeout(0)：等 Carrd layout 完成後再執行首次 scale
     setTimeout(() => applyScale(host, root), 0);
 
-    // 用 window resize 監聽，跟 hero/sched/bio 行為一致
-    // 不依賴容器寬，避免 Carrd embed wrapper 結構差異造成問題
-    window.addEventListener("resize", onResize);
+    // ResizeObserver 觀察 host，視窗縮放時同步更新字體
+    if (window.ResizeObserver){
+      new ResizeObserver(onResize).observe(host);
+    } else {
+      window.addEventListener("resize", onResize);
+    }
 
     // single-open
     const items = Array.from(root.querySelectorAll("details"));
