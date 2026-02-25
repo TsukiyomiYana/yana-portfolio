@@ -197,7 +197,7 @@
   `;
 
   const CFG = {
-    minW: 260, maxW: 520,
+    minW: 160, maxW: 400,  // 對應 Carrd 實際欄寬範圍
     minFS: 12, maxFS: 15,
     minLS: 0.06, maxLS: 0.09,
     minPY: 12, maxPY: 16,
