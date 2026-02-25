@@ -196,32 +196,40 @@
   </div>
   `;
 
-  const CFG = {
-    minW: 160, maxW: 400,  // 對應 Carrd 實際欄寬範圍
-    minFS: 12, maxFS: 15,
-    minLS: 0.06, maxLS: 0.09,
-    minPY: 12, maxPY: 16,
-    minIC: 14, maxIC: 16
-  };
+const CFG = {
+  // 把 maxW 拉大，避免桌機寬度直接 t=1
+  minW: 260, maxW: 1200,
+
+  // 把 maxFS 壓低，確保不會比你上方區塊大
+  minFS: 11.5, maxFS: 13.2,
+
+  minLS: 0.06, maxLS: 0.09,
+  minPY: 12, maxPY: 16,
+  minIC: 14, maxIC: 16
+};
 
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-  // 量 host 容器寬（跟 comms/sched/bio 量各自元素寬的邏輯一致）
-  // offsetWidth 比 getBoundingClientRect 更早在 layout 後可用
-  function applyScale(host, root){
-    const w = host.offsetWidth || host.getBoundingClientRect().width || 300;
-    const t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
+  function applyScale(root, host){
+  const w = root.getBoundingClientRect().width;
+  const t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
 
-    const fs = CFG.minFS + (CFG.maxFS - CFG.minFS) * t;
-    const ls = CFG.minLS + (CFG.maxLS - CFG.minLS) * t;
-    const py = CFG.minPY + (CFG.maxPY - CFG.minPY) * t;
-    const ic = CFG.minIC + (CFG.maxIC - CFG.minIC) * t;
+  // 讀取外層容器字級（跟你的 COMMISSIONS 那區一致）
+  const baseFS = parseFloat(getComputedStyle(host).fontSize) || 13;
 
-    root.style.setProperty("--fs", fs.toFixed(2) + "px");
-    root.style.setProperty("--ls", ls.toFixed(3) + "em");
-    root.style.setProperty("--py", py.toFixed(2) + "px");
-    root.style.setProperty("--ic", ic.toFixed(2) + "px");
-  }
+  // 只在 baseFS 以下微調（最大不超過 baseFS）
+  const minScale = 0.92, maxScale = 1.00;
+  const fs = baseFS * (minScale + (maxScale - minScale) * t);
+
+  const ls = CFG.minLS + (CFG.maxLS - CFG.minLS) * t;
+  const py = CFG.minPY + (CFG.maxPY - CFG.minPY) * t;
+  const ic = CFG.minIC + (CFG.maxIC - CFG.minIC) * t;
+
+  root.style.setProperty("--fs", fs.toFixed(2) + "px");
+  root.style.setProperty("--ls", ls.toFixed(3) + "em");
+  root.style.setProperty("--py", py.toFixed(2) + "px");
+  root.style.setProperty("--ic", ic.toFixed(2) + "px");
+}
 
   function mount(host){
     if (host.dataset.mounted === "1") return;
@@ -231,7 +239,8 @@
     const root = host.querySelector("[data-qaaccordion]");
     if (!root) return;
 
-    const onResize = () => requestAnimationFrame(() => applyScale(host, root));
+    const onResize = () => requestAnimationFrame(() => applyScale(root, host));
+applyScale(root, host);
 
     // setTimeout(0)：等 Carrd layout 完成後再執行首次 scale
     setTimeout(() => applyScale(host, root), 0);
