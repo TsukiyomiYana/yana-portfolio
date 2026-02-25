@@ -191,32 +191,18 @@
   `;
 
   const CFG = {
-  // 讓 QA 不會太快打到最大字級：
-  // maxW 拉大 + maxFS 降低 = 寬的區塊也不會變超大
-  minW: 260, maxW: 700,
-  minFS: 11.5, maxFS: 13.5,
-  minLS: 0.06, maxLS: 0.09,
-
-  // spacing 仍照你原本
-  minPY: 12, maxPY: 16,
-  minIC: 14, maxIC: 16
-};
+    minW: 260, maxW: 520,
+    minFS: 12, maxFS: 15,
+    minLS: 0.06, maxLS: 0.09  // sched 這行很短，字距縮放幅度小一點比較穩
+  };
 
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-  function applyScale(root){
-    const w = root.getBoundingClientRect().width;
+    function applyScale(el){
+    const w = el.getBoundingClientRect().width;
     const t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
-
     const fs = CFG.minFS + (CFG.maxFS - CFG.minFS) * t;
-    const ls = CFG.minLS + (CFG.maxLS - CFG.minLS) * t;
-    const py = CFG.minPY + (CFG.maxPY - CFG.minPY) * t;
-    const ic = CFG.minIC + (CFG.maxIC - CFG.minIC) * t;
-
-    root.style.setProperty("--fs", fs.toFixed(2) + "px");
-    root.style.setProperty("--ls", ls.toFixed(3) + "em");
-    root.style.setProperty("--py", py.toFixed(2) + "px");
-    root.style.setProperty("--ic", ic.toFixed(2) + "px");
+    el.style.setProperty("--fs", fs.toFixed(2) + "px");
   }
 
   function mount(host){
