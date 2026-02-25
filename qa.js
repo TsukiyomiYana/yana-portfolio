@@ -1,5 +1,8 @@
-// qa.js (ROBUST BOOT - retries + MutationObserver; content same as your current file)
+// qa.js (FINAL - uses <p><br> for the "⟡" lines, no <li> in Character Profile)
 (() => {
+  const hosts = Array.from(document.querySelectorAll("[data-qa-host]"));
+  if (!hosts.length) return;
+
   const HTML = `
   <div class="yana-faq" data-qaaccordion data-mode="single">
 
@@ -91,6 +94,9 @@
               <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Tsukiyomi Yana Photo ID">
               <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu Photo ID">
             </div>
+
+            <!-- 單張版本（要單張就把上面 media-grid 刪掉，改用這行） -->
+            <!-- <img src="https://YOUR_IMAGE_URL.png" alt="Character Photo"> -->
           </div>
 
         </div>
@@ -193,36 +199,55 @@
   const CFG = {
     minW: 260, maxW: 520,
     minFS: 12, maxFS: 15,
-    minLS: 0.06, maxLS: 0.09  // sched 這行很短，字距縮放幅度小一點比較穩
+    minLS: 0.06, maxLS: 0.09,
+    minPY: 12, maxPY: 16,
+    minIC: 14, maxIC: 16
   };
 
   const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 
-    function applyScale(el){
-    const w = el.getBoundingClientRect().width;
-    const t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
+  // host = 量寬用（Carrd 直接放的容器，layout 最穩）
+  // root = 套 CSS 變數用（[data-qaaccordion]）
+  function applyScale(host, root){
+    const w = host.getBoundingClientRect().width;
+    // 如果 host 還沒 layout（寬度為 0），fallback 用視窗寬
+    const safeW = w > 0 ? w : window.innerWidth;
+    const t = clamp((safeW - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
+
     const fs = CFG.minFS + (CFG.maxFS - CFG.minFS) * t;
-    el.style.setProperty("--fs", fs.toFixed(2) + "px");
+    const ls = CFG.minLS + (CFG.maxLS - CFG.minLS) * t;
+    const py = CFG.minPY + (CFG.maxPY - CFG.minPY) * t;
+    const ic = CFG.minIC + (CFG.maxIC - CFG.minIC) * t;
+
+    root.style.setProperty("--fs", fs.toFixed(2) + "px");
+    root.style.setProperty("--ls", ls.toFixed(3) + "em");
+    root.style.setProperty("--py", py.toFixed(2) + "px");
+    root.style.setProperty("--ic", ic.toFixed(2) + "px");
   }
 
   function mount(host){
-    if (!host || host.dataset.mounted === "1") return false;
+    if (host.dataset.mounted === "1") return;
     host.dataset.mounted = "1";
     host.innerHTML = HTML;
 
     const root = host.querySelector("[data-qaaccordion]");
-    if (!root) return false;
+    if (!root) return;
 
-    const onResize = () => requestAnimationFrame(() => applyScale(root));
-    applyScale(root);
+    const onResize = () => requestAnimationFrame(() => applyScale(host, root));
+
+    // setTimeout(0)：等 Carrd 把 embed wrapper 完整 layout 後再量寬
+    // 避免首次執行時 getBoundingClientRect() 拿到 0
+    setTimeout(() => applyScale(host, root), 0);
 
     if (window.ResizeObserver){
       const ro = new ResizeObserver(onResize);
-      ro.observe(root);
+      // 觀察 host（Carrd 的容器），感應更穩定
+      ro.observe(host);
     } else {
       window.addEventListener("resize", onResize);
     }
 
+    // single-open
     const items = Array.from(root.querySelectorAll("details"));
     items.forEach(d => {
       d.addEventListener("toggle", () => {
@@ -230,35 +255,7 @@
         items.forEach(o => { if(o !== d) o.open = false; });
       });
     });
-
-    return true;
   }
 
-  function mountAll(){
-    const hosts = Array.from(document.querySelectorAll("[data-qa-host]"));
-    if (!hosts.length) return 0;
-    let n = 0;
-    hosts.forEach(h => { if (mount(h)) n++; });
-    return n;
-  }
-
-  // 1) immediate try
-  mountAll();
-
-  // 2) DOMContentLoaded try
-  document.addEventListener("DOMContentLoaded", () => mountAll(), { once: true });
-
-  // 3) retry a few times (Carrd sometimes injects late)
-  let tries = 0;
-  const timer = setInterval(() => {
-    tries++;
-    mountAll();
-    if (tries >= 10) clearInterval(timer);
-  }, 300);
-
-  // 4) MutationObserver (if host is added later)
-  if (document.body && window.MutationObserver){
-    const mo = new MutationObserver(() => mountAll());
-    mo.observe(document.body, { childList: true, subtree: true });
-  }
+  hosts.forEach(mount);
 })();
