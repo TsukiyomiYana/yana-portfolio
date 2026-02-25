@@ -1,3 +1,5 @@
+/* qa.css (FINAL - smaller fallback typography) */
+
 /* 字體強制套到所有子元素（避免 Carrd 覆蓋） */
 [data-qaaccordion],
 [data-qaaccordion] *{
@@ -8,10 +10,13 @@
 
 /* 根節點：只控制字級/字距變數，避免影響整塊置中 */
 [data-qaaccordion]{
-  --fs: 15px;    /* JS 會更新 */
-  --ls: 0.09em;  /* JS 會更新 */
-  --py: 14px;    /* JS 會更新 */
-  --ic: 16px;    /* JS 會更新 */
+  /* ↓↓↓ fallback（JS 還沒跑/沒載入時也不會字體爆大） */
+  --fs: 12px;    /* 原本 15px → 改小 */
+  --ls: 0.06em;  /* 原本 0.09em → 改小 */
+
+  /* spacing/icon fallback */
+  --py: 14px;
+  --ic: 16px;
 
   font-size: var(--fs) !important;
   letter-spacing: var(--ls) !important;
@@ -114,8 +119,8 @@
   padding: 0 0 calc(var(--py) + 2px) calc(var(--ic) + 24px);
 
   line-height: 1.75 !important;
-  font-size: inherit !important;          /* 內文字級完全跟 CFG */
-  letter-spacing: inherit !important;     /* 內文字距完全跟 CFG */
+  font-size: inherit !important;          /* 內文字級跟 root */
+  letter-spacing: inherit !important;     /* 內文字距跟 root */
 }
 
 /* 一般段落/列表間距 */
@@ -164,7 +169,7 @@
   gap: 10px;
 }
 
-/* Character Profile 右側照片：不要被通用 img margin 影響，避免上下多出空白 */
+/* Character Profile 右側照片：不要被通用 img margin 影響 */
 [data-qaaccordion] .profile-media img{
   margin: 0 !important;
   width: 100%;
@@ -174,7 +179,7 @@
   border: 1px solid rgba(0,0,0,.06);
 }
 
-/* 清單、間距更乾淨 */
+/* <p><br> 版式：讓它像清單、間距更乾淨 */
 [data-qaaccordion] .spark-par{
   margin: 0 !important;
   line-height: 1.75 !important;
@@ -190,6 +195,6 @@
     gap: 14px;
   }
   [data-qaaccordion] .media-grid{
-    grid-template-columns: 1fr 1fr; /* 手機也保留兩張並排；想一張一排就改 1fr */
+    grid-template-columns: 1fr 1fr; /* 想一張一排就改 1fr */
   }
 }
