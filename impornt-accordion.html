@@ -628,9 +628,13 @@ body {
   }
   syncLang();
 
-  /* Poll every 400ms so it picks up parent changes (for same-origin embeds).
-     If your Carrd uses cross-origin iframes this still reads localStorage fine. */
-  setInterval(syncLang, 400);
+  // storage event：同源時即時反應（Carrd 同網域下有效）
+  window.addEventListener("storage", function(e){
+    if(e.key === "site_lang") syncLang();
+  });
+
+  // Fallback polling 200ms：跨域 iframe 用（GitHub Pages → Carrd）
+  setInterval(syncLang, 200);
 
   /* ===== 2. Responsive font scaling ===== */
   var root = document.getElementById("imporntRoot");
