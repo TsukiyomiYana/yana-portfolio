@@ -619,22 +619,22 @@ body {
 
 <script>
 (function(){
-  /* ===== 1. Language sync with parent page ===== */
-  function syncLang(){
-    var lang = "tw";
-    try{ lang = localStorage.getItem("site_lang") || "tw"; }catch(e){}
+  /* ===== 1. Language sync via postMessage (cross-origin) ===== */
+  function setLang(lang){
     if(lang !== "tw" && lang !== "ja" && lang !== "en") lang = "tw";
     document.documentElement.setAttribute("data-lang", lang);
   }
-  syncLang();
 
-  // storage event：同源時即時反應（Carrd 同網域下有效）
-  window.addEventListener("storage", function(e){
-    if(e.key === "site_lang") syncLang();
+  // 預設繁中，等父頁面傳來正確語言
+  setLang("tw");
+
+  // 接收來自 Carrd 父頁面的語言訊息
+  window.addEventListener("message", function(e){
+    if(e.data && e.data.type === "set-lang"){
+      setLang(e.data.lang);
+    }
+    // 同時處理高度訊息（不衝突）
   });
-
-  // Fallback polling 200ms：跨域 iframe 用（GitHub Pages → Carrd）
-  setInterval(syncLang, 200);
 
   /* ===== 2. Responsive font scaling ===== */
   var root = document.getElementById("imporntRoot");
