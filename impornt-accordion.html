@@ -598,7 +598,7 @@ body {
   var root = document.getElementById("imporntRoot");
   var CFG = {
     minW: 260, maxW: 520,
-    minFS: 11, maxFS: 14,
+    minFS: 12, maxFS: 14,
     minTitleFS: 13, maxTitleFS: 15
   };
 
@@ -611,7 +611,7 @@ body {
     var fs = CFG.minFS + (CFG.maxFS - CFG.minFS) * t;
     var tfs = CFG.minTitleFS + (CFG.maxTitleFS - CFG.minTitleFS) * t;
     root.style.setProperty("--fs", fs.toFixed(2) + "px");
-    root.style.setProperty("--fs-title", tfs.toFixed(2) + "px");
+    root.style.setProperty("--fs-title", tfs.toFixed(3) + "px");
   }
 
   applyScale();
