@@ -164,14 +164,34 @@ body {
   display: flex;
   gap: clamp(6px, 1.5vw, 14px);
   flex-shrink: 0;
-  /* 圖片區塊佔整體約 38%，視窗縮放時一起縮 */
-  width: clamp(220px, 50%, 380px);
+  align-self: flex-start;
+  margin-left: auto;      /* 推到右邊但不貼邊 */
+  margin-right: 12px;     /* 離右邊緣留一點距離 */
+  width: clamp(220px, 48%, 360px);
 }
-.char-imgs img {
+
+/* 每張圖片 + 名字的包裝 */
+.char-img-item {
   flex: 1 1 0;
   min-width: 0;
-  width: 0; /* flex 決定寬度 */
-  aspect-ratio: 962 / 1200; /* 原圖比例 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.char-img-name {
+  font-size: calc(var(--fs) * 0.82);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #3A2F2A;
+  opacity: 0.75;
+  text-align: center;
+  line-height: 1.2;
+}
+.char-imgs img {
+  width: 100%;
+  aspect-ratio: 962 / 1200;
   height: auto;
   object-fit: cover;
   object-position: top center;
@@ -345,8 +365,14 @@ body {
                   <p>中文🔴 日本語🔴 English🔴</p>
                 </div>
                 <div class="char-imgs">
-                  <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Tsukiyomi Yana Photo ID">
-                  <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu Photo ID">
+                  <div class="char-img-item">
+                    <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Tsukiyomi Yana Photo ID">
+                    <span class="char-img-name">Yana</span>
+                  </div>
+                  <div class="char-img-item">
+                    <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu Photo ID">
+                    <span class="char-img-name">Anu</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -365,8 +391,14 @@ body {
                   <p>中文🔴 日本語🔴 English🔴</p>
                 </div>
                 <div class="char-imgs">
-                  <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Tsukiyomi Yana Photo ID">
-                  <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu Photo ID">
+                  <div class="char-img-item">
+                    <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Tsukiyomi Yana Photo ID">
+                    <span class="char-img-name">Yana</span>
+                  </div>
+                  <div class="char-img-item">
+                    <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu Photo ID">
+                    <span class="char-img-name">Anu</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -385,8 +417,14 @@ body {
                   <p>中文🔴 日本語🔴 English🔴</p>
                 </div>
                 <div class="char-imgs">
-                  <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Tsukiyomi Yana Photo ID">
-                  <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu Photo ID">
+                  <div class="char-img-item">
+                    <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Tsukiyomi Yana Photo ID">
+                    <span class="char-img-name">Yana</span>
+                  </div>
+                  <div class="char-img-item">
+                    <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu Photo ID">
+                    <span class="char-img-name">Anu</span>
+                  </div>
                 </div>
               </div>
             </div>
