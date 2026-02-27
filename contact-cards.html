@@ -298,8 +298,9 @@ html, body {
 
 /* ===== HINT BELOW ===== */
 .contact-hint {
+  --hint-fs: 11px;
   font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
-  font-size: 13px;
+  font-size: var(--hint-fs);
   font-weight: 400;
   letter-spacing: 0.07em;
   line-height: 1.65;
@@ -307,6 +308,7 @@ html, body {
   opacity: 0.95;
   text-align: center;
   user-select: none;
+  margin-top: 6px;  /* カードとの間隔 */
 }
 
 /* ===== EXTERNAL LINK MODAL ===== */
@@ -712,16 +714,50 @@ html, body {
     if(e.key==="Escape") closeModal();
   });
 
-  /* ===== Height report ===== */
+  /* ===== Height report — ResizeObserver で wrap 後も追跡 ===== */
   var _lastH = 0;
   function reportHeight(){
     var el = document.getElementById("contactRoot");
     if(!el) return;
-    var h = Math.ceil(el.offsetHeight) + 24;
-    if(h===_lastH) return; _lastH = h;
-    try{ window.parent.postMessage({type:"contactcard-height",height:h},"*"); }catch(_){}
+    var h = Math.ceil(el.getBoundingClientRect().height) + 24;
+    if(h === _lastH) return;
+    _lastH = h;
+    try{ window.parent.postMessage({type:"contactcard-height", height:h}, "*"); }catch(_){}
   }
-  [0,300,800,1500].forEach(function(ms){ setTimeout(reportHeight, ms); });
+
+  // 初期ロード
+  [0, 300, 800, 1500].forEach(function(ms){ setTimeout(reportHeight, ms); });
+
+  // リサイズ時（カードが2×2に折り返した瞬間を捉える）
+  if(window.ResizeObserver){
+    var ro = new ResizeObserver(function(){
+      requestAnimationFrame(reportHeight);
+    });
+    ro.observe(document.getElementById("contactRoot"));
+  } else {
+    window.addEventListener("resize", reportHeight);
+  }
+
+  /* ===== Hint fluid scaling ===== */
+  var hintEl = document.querySelector(".contact-hint");
+  if(hintEl){
+    var hintCFG = { minW:260, maxW:520, minFS:9, maxFS:11 };
+    function applyHintScale(){
+      var wrap = document.getElementById("contactRoot");
+      if(!wrap) return;
+      var w = wrap.getBoundingClientRect().width;
+      var t = Math.max(0, Math.min(1, (w - hintCFG.minW)/(hintCFG.maxW - hintCFG.minW)));
+      var fs = hintCFG.minFS + (hintCFG.maxFS - hintCFG.minFS)*t;
+      hintEl.style.setProperty("--hint-fs", fs.toFixed(2)+"px");
+    }
+    applyHintScale();
+    if(window.ResizeObserver){
+      new ResizeObserver(function(){ requestAnimationFrame(applyHintScale); })
+        .observe(document.getElementById("contactRoot"));
+    } else {
+      window.addEventListener("resize", applyHintScale);
+    }
+  }
 
 })();
 </script>
