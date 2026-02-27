@@ -164,9 +164,10 @@ body {
   gap: clamp(6px, 1.5vw, 14px);
   flex-shrink: 0;
   align-self: flex-start;
-  /* margin-left:auto を削除 — char-text が flex:1 なので自然に右に寄る。
-     auto を残すと wrap 後に右コーナーへ飛ぶバグの原因になる。*/
-  width: clamp(160px, 44%, 320px);
+  /* 右側の呼吸感：右端との間隔 */
+  margin-right: clamp(8px, 2.5%, 24px);
+  /* 幅：最小150px、最大38%。flex-wrap が起きない程度に抑える */
+  width: clamp(150px, 38%, 280px);
 }
 
 /* 每張圖片 + 名字的包裝 */
@@ -315,8 +316,6 @@ body {
 :root[data-lang="en"] .lang-ja { display: none !important; }
 
 /* ===== MOBILE ===== */
-/* 560px：char-text(200px) + gap(18px) + char-imgs(160px) = 378px
-   保險起見設 560px，讓兩欄有足夠空間並排再開始 stack */
 @media (max-width: 560px) {
   /* 角色圖片：stack 到文字下方並置中 */
   .char-layout {
@@ -328,15 +327,16 @@ body {
     min-width: unset;
   }
   .char-imgs {
-    width: auto;          /* 讓兩張圖自然並排，不撐滿 */
+    /* stack 後：margin-right をリセット、置中・幅を制限 */
+    margin-right: 0;
+    width: clamp(200px, 72%, 320px);
     justify-content: center;
-    align-self: center;   /* 覆蓋 flex-start，確保置中 */
+    align-self: center;
   }
   .char-img-placeholder { width: 100px; height: 125px; }
   .impornt-panel-content { padding-left: 18px; }
   .price-table th, .price-table td { padding: 7px 8px; }
 
-  /* 手機版標題列 */
   .impornt-toggle {
     padding: 11px 4px;
     letter-spacing: 0.08em;
