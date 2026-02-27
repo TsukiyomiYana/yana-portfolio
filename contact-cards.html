@@ -48,12 +48,12 @@ html, body {
 
 /* ===== HEADER LABEL ===== */
 .contact-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.26em;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--brown);
-  opacity: 0.38;
+  opacity: 1;
   text-align: center;
   user-select: none;
 }
@@ -306,6 +306,101 @@ html, body {
   user-select: none;
 }
 
+/* ===== EXTERNAL LINK MODAL ===== */
+.ext-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(58,47,42,.38);
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.ext-overlay.is-open { display: flex; }
+
+.ext-modal {
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(58,47,42,.14);
+  border-radius: 16px;
+  padding: 24px 22px 20px;
+  max-width: 300px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(58,47,42,.18);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.ext-modal-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.ext-modal-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
+.ext-modal-body {
+  font-size: 11.5px;
+  color: var(--brown-mid);
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+.ext-modal-url {
+  font-size: 10px;
+  color: var(--brown-lt);
+  letter-spacing: 0.02em;
+  word-break: break-all;
+  background: rgba(58,47,42,.05);
+  border-radius: 6px;
+  padding: 5px 10px;
+  width: 100%;
+}
+.ext-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.ext-modal-cancel {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(58,47,42,.22);
+  background: transparent;
+  color: var(--brown);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+}
+.ext-modal-cancel:hover { background: rgba(58,47,42,.06); }
+.ext-modal-go {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: none;
+  background: var(--brown);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .15s;
+}
+.ext-modal-go:hover { opacity: .82; }
+
 /* ===== MOBILE ===== */
 @media (max-width: 400px) {
   .card-scene { width: 96px; height: 134px; }
@@ -474,6 +569,36 @@ html, body {
 
 </div>
 
+<!-- External link confirmation modal -->
+<div class="ext-overlay" id="extOverlay" role="dialog" aria-modal="true">
+  <div class="ext-modal">
+    <div class="ext-modal-icon">🔗</div>
+    <div class="ext-modal-title">
+      <span class="lang-tw">即將離開本站</span>
+      <span class="lang-ja">外部リンクへ移動</span>
+      <span class="lang-en">Leaving this site</span>
+    </div>
+    <div class="ext-modal-body">
+      <span class="lang-tw">您將前往 TsukiyomiYana 以外的外部網頁。</span>
+      <span class="lang-ja">TsukiyomiYana のサイトを離れて外部リンクにアクセスします。</span>
+      <span class="lang-en">You're about to leave TsukiyomiYana's website and visit an external link.</span>
+    </div>
+    <div class="ext-modal-url" id="extUrl"></div>
+    <div class="ext-modal-actions">
+      <button class="ext-modal-cancel" id="extCancel">
+        <span class="lang-tw">取消</span>
+        <span class="lang-ja">キャンセル</span>
+        <span class="lang-en">Cancel</span>
+      </button>
+      <a class="ext-modal-go" id="extGo" href="#" target="_blank" rel="noopener">
+        <span class="lang-tw">前往</span>
+        <span class="lang-ja">移動する</span>
+        <span class="lang-en">Continue</span>
+      </a>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
 
@@ -496,7 +621,8 @@ html, body {
   /* ===== Flip ===== */
   document.querySelectorAll(".card-scene").forEach(function(scene){
     scene.addEventListener("click", function(e){
-      if(e.target.closest(".back-btn[data-copy]")) return; // copy btn
+      // 背面のボタン・リンクはすべて翻牌を止める
+      if(e.target.closest(".back-btn")) return;
       scene.classList.toggle("is-flipped");
     });
     scene.addEventListener("keydown", function(e){
@@ -507,32 +633,80 @@ html, body {
     });
   });
 
-  /* ===== Copy ===== */
-  async function writeClip(text){
+  /* ===== Copy (iframe-safe) ===== */
+  function writeClip(text){
+    // Try modern API first
     if(navigator.clipboard && window.isSecureContext){
-      await navigator.clipboard.writeText(text); return;
+      return navigator.clipboard.writeText(text);
     }
-    var ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.cssText = "position:fixed;left:-9999px;opacity:0";
-    document.body.appendChild(ta); ta.select();
-    document.execCommand("copy"); document.body.removeChild(ta);
+    // execCommand fallback
+    return new Promise(function(resolve, reject){
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.cssText = "position:fixed;left:-9999px;top:-9999px;opacity:0";
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error("copy failed"));
+    });
   }
-  document.addEventListener("click", async function(e){
+
+  document.addEventListener("click", function(e){
     var btn = e.target.closest(".back-btn[data-copy]");
     if(!btn) return;
+    e.preventDefault();
     e.stopPropagation();
     var text = btn.getAttribute("data-copy");
     if(!text) return;
-    try{
-      await writeClip(text);
+    writeClip(text).then(function(){
       var prev = btn.textContent;
       btn.textContent = "✔"; btn.classList.add("copied");
       clearTimeout(btn._t);
       btn._t = setTimeout(function(){
         btn.textContent = prev; btn.classList.remove("copied");
       }, 1000);
-    }catch(_){}
+    }).catch(function(){
+      // 複製失敗時はテキストを選択状態にする
+      btn.textContent = "!"; btn.style.opacity=".5";
+      setTimeout(function(){ btn.textContent="Copy"; btn.style.opacity=""; }, 1500);
+    });
+  });
+
+  /* ===== External link modal ===== */
+  var overlay   = document.getElementById("extOverlay");
+  var extUrlEl  = document.getElementById("extUrl");
+  var extGo     = document.getElementById("extGo");
+  var extCancel = document.getElementById("extCancel");
+
+  function openModal(href){
+    extUrlEl.textContent = href;
+    extGo.href = href;
+    overlay.classList.add("is-open");
+  }
+  function closeModal(){
+    overlay.classList.remove("is-open");
+    extGo.href = "#";
+    extUrlEl.textContent = "";
+  }
+
+  // Intercept all OPEN links (no data-copy = open link)
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest(".back-btn:not([data-copy])");
+    if(!btn) return;
+    var href = btn.getAttribute("href");
+    if(!href || href==="#") return;
+    e.preventDefault();
+    e.stopPropagation();
+    openModal(href);
+  });
+
+  extCancel.addEventListener("click", closeModal);
+  overlay.addEventListener("click", function(e){
+    if(e.target === overlay) closeModal();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="Escape") closeModal();
   });
 
   /* ===== Height report ===== */
