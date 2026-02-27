@@ -26,13 +26,11 @@
   position:absolute;
   top:0; left:0; right:0;
   display:flex;
-  justify-content: center;   /* 置中 */
+  justify-content:center;
   gap:8px;
   flex-wrap:wrap;
   z-index:6;
   pointer-events:auto;
-
-  /* 讓 tabs 看起來在元件最上方（不壓到 stage） */
   padding:12px 12px 0;
 }
 #yana-carousel-portfolio .yana-tab{
@@ -58,6 +56,7 @@
 
 #yana-carousel-portfolio .yana-media{ position:absolute; inset:0; }
 #yana-carousel-portfolio .yana-frame{ position:absolute; inset:0; }
+
 /* 主畫面：圖片完整顯示（不裁切） */
 #yana-carousel-portfolio .yana-frame img,
 #yana-carousel-portfolio .yana-frame video{
@@ -65,7 +64,7 @@
   height:100%;
   border:0;
   display:block;
-  object-fit:contain; /* ✅ 改這個 */
+  object-fit:contain;
 }
 
 /* iframe 不吃 object-fit，保留全滿即可 */
@@ -76,25 +75,93 @@
   display:block;
 }
 
+/* ===== META (Version 2: collapsed by default) ===== */
 #yana-carousel-portfolio .yana-meta{
   position:absolute;
   left:12px;
-  right:12px;
   bottom:12px;
   z-index:3;
+
   width:fit-content;
   max-width:calc(100% - 24px);
+
   background:rgba(255,255,255,.70);
   border:1px solid rgba(58,47,42,.18);
-  border-radius:14px;
-  padding:12px 14px;
   backdrop-filter:blur(6px);
 
-  /* ✅ 關鍵：讓點擊穿透到 iframe，避免手機上遮住播放 */
+  /* 重要：不擋影片點擊，只有按鈕/連結能點 */
   pointer-events:none;
 
   transition: opacity .18s ease, transform .18s ease;
 }
+
+/* ⓘ toggle button (JS 會插進來) */
+#yana-carousel-portfolio .yana-meta-toggle{
+  pointer-events:auto;
+  appearance:none;
+  border:1px solid rgba(58,47,42,.18);
+  background:rgba(255,255,255,.55);
+  color:#3A2F2A;
+
+  width:30px;
+  height:30px;
+  border-radius:999px;
+
+  display:inline-grid;
+  place-items:center;
+
+  font-size:14px;
+  font-weight:800;
+  line-height:1;
+  cursor:pointer;
+  user-select:none;
+}
+#yana-carousel-portfolio .yana-meta-toggle:hover{
+  background:#3A2F2A;
+  color:#fff;
+}
+
+/* collapsed (default) */
+#yana-carousel-portfolio .yana-meta:not(.is-open){
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px 10px;
+  border-radius:999px;
+}
+#yana-carousel-portfolio .yana-meta:not(.is-open) .d,
+#yana-carousel-portfolio .yana-meta:not(.is-open) .yana-links{
+  display:none;
+}
+#yana-carousel-portfolio .yana-meta:not(.is-open) .t{
+  margin:0;
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.02em;
+
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:min(520px, calc(100vw - 24px - 30px - 30px));
+  opacity:.95;
+}
+
+/* open */
+#yana-carousel-portfolio .yana-meta.is-open{
+  display:block;
+  border-radius:14px;
+  padding:12px 14px;
+}
+#yana-carousel-portfolio .yana-meta.is-open .yana-meta-toggle{
+  float:right;
+  margin-left:10px;
+}
+#yana-carousel-portfolio .yana-meta.is-open::after{
+  content:"";
+  display:block;
+  clear:both;
+}
+
 #yana-carousel-portfolio .yana-meta .t{
   font-size:13px;
   letter-spacing:.02em;
@@ -107,12 +174,14 @@
   margin:0 0 10px;
   opacity:.92;
 }
+
 #yana-carousel-portfolio .yana-links{
   display:flex;
   flex-wrap:wrap;
   gap:8px;
 }
 #yana-carousel-portfolio .yana-links a{
+  pointer-events:auto; /* 只有連結能點 */
   display:inline-block;
   text-decoration:none;
   border:1px solid rgba(58,47,42,.18);
@@ -123,15 +192,13 @@
   font-size:12px;
   letter-spacing:.06em;
   text-transform:uppercase;
-
-  /* ✅ 只讓連結可以點 */
-  pointer-events:auto;
 }
 #yana-carousel-portfolio .yana-links a:hover{
   background:#3A2F2A;
   color:#fff;
 }
 
+/* cards */
 #yana-carousel-portfolio .yana-card{
   position:absolute;
   inset:0;
@@ -149,6 +216,7 @@
   text-align:left;
 }
 
+/* nav */
 #yana-carousel-portfolio .yana-nav{
   position:absolute;
   top:50%;
@@ -170,6 +238,7 @@
 #yana-carousel-portfolio .yana-next{ right:12px; }
 #yana-carousel-portfolio .yana-nav:disabled{ opacity:.35; cursor:default; }
 
+/* thumbbar */
 #yana-carousel-portfolio .yana-thumbbar{
   display:grid;
   grid-template-columns:52px 1fr 52px;
@@ -205,7 +274,7 @@
   user-select:none;
   cursor:grab;
 
-  /* Hide scrollbar (optional but recommended) */
+  /* Hide scrollbar */
   scrollbar-width:none;
 }
 #yana-carousel-portfolio .yana-thumbs:active{ cursor:grabbing; }
@@ -253,6 +322,7 @@
   letter-spacing:.06em;
 }
 
+/* mobile */
 @media (max-width:520px){
   #yana-carousel-portfolio .yana-nav{ width:38px; height:38px; line-height:38px; }
   #yana-carousel-portfolio .yana-tab{ padding:7px 10px; font-size:12px; }
@@ -261,19 +331,17 @@
   #yana-carousel-portfolio .yana-thumbbar{ grid-template-columns:46px 1fr 46px; }
   #yana-carousel-portfolio .yana-thumbs{ padding:2px 10px; }
 
-  /* ✅ 手機上避免 meta 太大塊遮畫面 */
-  #yana-carousel-portfolio .yana-meta{
-    max-height: 36%;
+  /* 手機上 collapsed 只留 ⓘ，避免任何遮擋 */
+  #yana-carousel-portfolio .yana-meta:not(.is-open) .t{ display:none; }
+
+  /* 手機上 open 時避免 meta 太高 */
+  #yana-carousel-portfolio .yana-meta.is-open{
+    max-height: 42%;
     overflow: hidden;
   }
-  #yana-carousel-portfolio .yana-meta .t{
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  #yana-carousel-portfolio .yana-meta .d{
+  #yana-carousel-portfolio .yana-meta.is-open .d{
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
