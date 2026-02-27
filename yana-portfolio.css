@@ -272,3 +272,12 @@
 #yana-carousel-portfolio .yana-meta{
   transition: opacity .18s ease, transform .18s ease;
 }
+
+/* Let taps pass through the meta overlay so the video can be played (mobile + desktop safe) */
+#yana-carousel-portfolio .yana-meta{
+  pointer-events: none;
+}
+/* Re-enable clicks for links inside the meta card */
+#yana-carousel-portfolio .yana-meta .yana-links a{
+  pointer-events: auto;
+}
