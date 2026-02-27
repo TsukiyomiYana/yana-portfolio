@@ -281,3 +281,21 @@
 #yana-carousel-portfolio .yana-meta .yana-links a{
   pointer-events: auto;
 }
+
+@media (max-width:520px){
+  #yana-carousel-portfolio .yana-meta{
+    max-height: 36%;
+    overflow: hidden;
+  }
+  #yana-carousel-portfolio .yana-meta .t{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #yana-carousel-portfolio .yana-meta .d{
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
