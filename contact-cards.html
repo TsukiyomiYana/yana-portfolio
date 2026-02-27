@@ -562,9 +562,9 @@ html, body {
   </div><!-- /cards-grid -->
 
   <div class="contact-hint">
-    <span class="lang-tw">點擊每張牌查看聯絡方式</span>
-    <span class="lang-ja">各カードをタップして確認</span>
-    <span class="lang-en">Tap each card to reveal</span>
+    <span class="lang-tw">點擊各個卡牌來查看聯絡我的方式</span>
+    <span class="lang-ja">カードをクリックして連絡方法を見よう</span>
+    <span class="lang-en">Click each card to see how to contact me</span>
   </div>
 
 </div>
@@ -579,9 +579,9 @@ html, body {
       <span class="lang-en">Leaving this site</span>
     </div>
     <div class="ext-modal-body">
-      <span class="lang-tw">您將前往 TsukiyomiYana 以外的外部網頁。</span>
-      <span class="lang-ja">TsukiyomiYana のサイトを離れて外部リンクにアクセスします。</span>
-      <span class="lang-en">You're about to leave TsukiyomiYana's website and visit an external link.</span>
+      <span class="lang-tw">您將前往 Tsukiyomi Yana 以外的外部網頁。</span>
+      <span class="lang-ja">Tsukiyomi Yana のサイトを離れて外部リンクにアクセスします。</span>
+      <span class="lang-en">You're about to leave Tsukiyomi Yana's Website and visit an external link.</span>
     </div>
     <div class="ext-modal-url" id="extUrl"></div>
     <div class="ext-modal-actions">
@@ -621,7 +621,7 @@ html, body {
   /* ===== Flip ===== */
   document.querySelectorAll(".card-scene").forEach(function(scene){
     scene.addEventListener("click", function(e){
-      // 背面のボタン・リンクはすべて翻牌を止める
+      // 背面的所有按鈕&連結都要停止翻牌動作
       if(e.target.closest(".back-btn")) return;
       scene.classList.toggle("is-flipped");
     });
@@ -667,7 +667,7 @@ html, body {
         btn.textContent = prev; btn.classList.remove("copied");
       }, 1000);
     }).catch(function(){
-      // 複製失敗時はテキストを選択状態にする
+      // 複製失敗的時候會出現的符號
       btn.textContent = "!"; btn.style.opacity=".5";
       setTimeout(function(){ btn.textContent="Copy"; btn.style.opacity=""; }, 1500);
     });
