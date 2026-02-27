@@ -147,7 +147,7 @@ body {
 }
 .char-text {
   flex: 1;
-  min-width: 200px;
+  min-width: 160px;
 }
 .char-text p {
   margin-bottom: 4px;
@@ -164,10 +164,9 @@ body {
   gap: clamp(6px, 1.5vw, 14px);
   flex-shrink: 0;
   align-self: flex-start;
-  /* 右側の呼吸感：右端との間隔 */
   margin-right: clamp(8px, 2.5%, 24px);
-  /* 幅：最小150px、最大38%。flex-wrap が起きない程度に抑える */
-  width: clamp(150px, 38%, 280px);
+  /* 各圖最小寬約 110px × 2 + gap → 約 230px；上限 330px */
+  width: clamp(230px, 43%, 330px);
 }
 
 /* 每張圖片 + 名字的包裝 */
