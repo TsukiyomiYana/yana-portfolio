@@ -643,6 +643,23 @@
         const meta = document.createElement("div");
         meta.className = "yana-meta";
 
+        // --- Meta toggle (collapsed by default) ---
+        const tog = document.createElement("button");
+              tog.type = "button";
+              tog.className = "yana-meta-toggle";
+              tog.setAttribute("aria-expanded", "false");
+              tog.setAttribute("aria-label", "Details");
+              tog.textContent = "ⓘ";
+
+              tog.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+        const open = meta.classList.toggle("is-open");
+              tog.setAttribute("aria-expanded", open ? "true" : "false");
+});
+
+meta.appendChild(tog);
+
         if (it.ti){
           const t = document.createElement("div");
           t.className = "t";
