@@ -485,7 +485,6 @@ html, body {
             <div class="back-value">tsukiyomiyana<br>@gmail.com</div>
             <div class="back-actions">
               <button class="back-btn" data-copy="tsukiyomiyana@gmail.com">Copy</button>
-              <a class="back-btn" href="mailto:tsukiyomiyana@gmail.com">Open</a>
             </div>
           </div>
           <div class="back-corner">♥ ♥ ♥</div>
@@ -702,6 +701,7 @@ html, body {
   });
 
   extCancel.addEventListener("click", closeModal);
+  extGo.addEventListener("click", function(){ setTimeout(closeModal, 80); });
   overlay.addEventListener("click", function(e){
     if(e.target === overlay) closeModal();
   });
