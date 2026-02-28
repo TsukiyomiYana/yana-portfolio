@@ -62,9 +62,12 @@ html, body {
 /* ===== CARD GRID ===== */
 .cards-grid {
   display: flex;
-  gap: 14px;
+  column-gap: 14px;
+  row-gap: 20px;
   justify-content: center;
   flex-wrap: wrap;
+  overflow: visible;
+  padding: 8px 4px;
 }
 
 /* ===== SINGLE CARD SCENE ===== */
@@ -75,6 +78,7 @@ html, body {
   perspective: 800px;
   cursor: pointer;
   flex-shrink: 0;
+  isolation: isolate;  /* 防止 3D transform 跨排互相干擾 */
 }
 
 /* hover lift */
