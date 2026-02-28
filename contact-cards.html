@@ -28,7 +28,7 @@
 
 html, body {
   background: transparent;
-  font-family: "Noto Sans TC", system-ui, sans-serif;
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   width: 100%;
   overflow-x: hidden;
@@ -48,12 +48,13 @@ html, body {
 
 /* ===== HEADER LABEL ===== */
 .contact-label {
-  font-size: 15px;
+  --label-fs: 15px;
+  --label-ls: 0.18em;
+  font-size: var(--label-fs);
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: var(--label-ls);
   text-transform: uppercase;
   color: var(--brown);
-  opacity: 1;
   text-align: center;
   user-select: none;
 }
@@ -147,7 +148,7 @@ html, body {
 /* Corner index — bottom-right (rotated) */
 .card-index-br {
   position: absolute;
-  bottom: 6px;
+  bottom: 24px;
   right: 7px;
   display: flex;
   flex-direction: column;
@@ -157,18 +158,17 @@ html, body {
   z-index: 2;
 }
 
-/* Character image area */
+/* Character image — left/right white border, equal top/bottom spacing */
 .card-art {
   flex: 1;
-  width: 100%;
   overflow: hidden;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 22px; /* space for top index */
+  margin: 12px 8px 30px 8px;  /* 上下均等、左右に白縁 */
 }
 .card-art img {
-  width: 92%;
+  width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: top center;
@@ -176,8 +176,12 @@ html, body {
   border-radius: 4px;
 }
 
-/* Card name strip at bottom */
+/* Strip — absolute, flush to card bottom, full width */
 .card-name-strip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: var(--suit-color, var(--brown));
   color: #fff;
   font-size: 8px;
@@ -186,34 +190,39 @@ html, body {
   text-transform: uppercase;
   text-align: center;
   padding: 4px 4px;
-  opacity: 0.88;
+  opacity: 0.92;
+  z-index: 2;
+  border-radius: 0 0 9px 9px; /* カード下角と合わせる */
 }
 
 /* ── BACK ── */
 .card-back {
-  background: var(--cream);
+  background: var(--suit-color, var(--brown));
   transform: rotateY(180deg);
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  padding: 0 0 0 0;
 }
 
 /* Back: suit colour header */
 .card-back-header {
-  background: var(--suit-color, var(--brown));
+  background: transparent;
   padding: 7px 8px 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 3px;
 }
 .back-suit-icon {
-  font-size: 16px;
+  font-size: 15px;
   color: rgba(255,255,255,.90);
   line-height: 1;
 }
 .back-platform-name {
-  font-size: 7.5px;
+  --bpn-fs: 9px;
+  font-size: var(--bpn-fs);
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -229,13 +238,19 @@ html, body {
   justify-content: center;
   align-items: center;
   gap: 8px;
-  padding: 8px 8px 6px;
+  padding: 8px;
+  background: var(--cream);
+  margin: 0 6px 6px 6px;
+  border-radius: 6px;
 }
 
 .back-value {
-  font-size: 9px;
+  --bv-fs: 12px;
+  --bv-ls: 0.04em;
+  font-size: var(--bv-fs);
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
   font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--bv-ls);
   color: var(--brown);
   text-align: center;
   word-break: break-all;
@@ -248,12 +263,14 @@ html, body {
   gap: 5px;
 }
 .back-btn {
+  --bb-fs: 7.5px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 3px;
   text-decoration: none;
-  font-size: 7.5px;
+  font-size: var(--bb-fs);
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
   font-weight: 600;
   letter-spacing: 0.10em;
   text-transform: uppercase;
@@ -265,7 +282,6 @@ html, body {
   cursor: pointer;
   transition: background .15s, color .15s;
   white-space: nowrap;
-  font-family: inherit;
 }
 .back-btn:hover, .back-btn:active {
   background: var(--suit-color, var(--brown));
@@ -280,13 +296,11 @@ html, body {
 
 /* ── Back: decorative corner suit ── */
 .back-corner {
-  font-size: 9px;
-  color: var(--suit-color, var(--brown));
-  opacity: 0.30;
+  font-size: 12px;
+  color: rgba(255,255,255,.72);
   line-height: 1;
   text-align: center;
-  margin-top: auto;
-  padding-bottom: 5px;
+  padding: 4px 4px 6px;
   letter-spacing: 4px;
 }
 
@@ -299,16 +313,17 @@ html, body {
 /* ===== HINT BELOW ===== */
 .contact-hint {
   --hint-fs: 11px;
+  --hint-ls: 0.07em;
   font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
   font-size: var(--hint-fs);
+  letter-spacing: var(--hint-ls);
   font-weight: 400;
-  letter-spacing: 0.07em;
   line-height: 1.65;
   color: #7A6A5A;
   opacity: 0.95;
   text-align: center;
   user-select: none;
-  margin-top: 6px;  /* カードとの間隔 */
+  margin-top: 10px;
 }
 
 /* ===== EXTERNAL LINK MODAL ===== */
@@ -407,14 +422,12 @@ html, body {
 .ext-modal-go:hover { opacity: .82; }
 
 /* ===== MOBILE ===== */
-@media (max-width: 400px) {
+@media (max-width: 480px) {
   .card-scene { width: 122px; height: 171px; }
   .card-index-num { font-size: 13px; }
   .card-art { padding-top: 20px; }
-  .back-value { font-size: 8px; }
-  .back-btn { font-size: 7px; padding: 3px 6px; }
-  .back-platform-name { font-size: 6.5px; }
-  .back-suit-icon { font-size: 13px; }
+  .back-value { line-height: 1.4; }
+  .back-btn { padding: 3px 6px; }
   .cards-grid { gap: 10px; }
 }
 </style>
@@ -444,7 +457,7 @@ html, body {
             <span class="card-index-suit">♠</span>
           </div>
           <div class="card-art">
-            <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Yana">
+            <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-poker-s01-962x1200-v1.webp" alt="Yana">
           </div>
           <div class="card-name-strip">Discord</div>
         </div>
@@ -738,26 +751,72 @@ html, body {
     window.addEventListener("resize", reportHeight);
   }
 
-  /* ===== Hint fluid scaling ===== */
-  var hintEl = document.querySelector(".contact-hint");
-  if(hintEl){
-    var hintCFG = { minW:260, maxW:520, minFS:9, maxFS:11 };
-    function applyHintScale(){
-      var wrap = document.getElementById("contactRoot");
-      if(!wrap) return;
-      var w = wrap.getBoundingClientRect().width;
-      var t = Math.max(0, Math.min(1, (w - hintCFG.minW)/(hintCFG.maxW - hintCFG.minW)));
-      var fs = hintCFG.minFS + (hintCFG.maxFS - hintCFG.minFS)*t;
-      hintEl.style.setProperty("--hint-fs", fs.toFixed(2)+"px");
+  /* ===== Fluid text scaling — 統一 CFG + ResizeObserver 模式 ===== */
+  (function(){
+    var CFG = {
+      minW: 260, maxW: 520,
+      /* contact-label */
+      label: { minFS: 13, maxFS: 15 },
+      /* back-platform-name */
+      bpn:   { minFS: 8.5, maxFS: 9 },
+      /* back-value */
+      bv:    { minFS: 11, maxFS: 12, minLS: 0.02, maxLS: 0.04 },
+      /* back-btn */
+      bb:    { minFS: 6.5, maxFS: 8 },
+      /* contact-hint */
+      hint:  { minFS: 9, maxFS: 11, minLS: 0.05, maxLS: 0.09 }
+    };
+
+    function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+    function applyScale(root){
+      var w = root.getBoundingClientRect().width;
+      var t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
+
+      function lerp(a,b){ return (a + (b-a)*t).toFixed(2); }
+      function lerpEm(a,b){ return (a + (b-a)*t).toFixed(3); }
+
+      // label
+      root.querySelectorAll(".contact-label").forEach(function(el){
+        el.style.setProperty("--label-fs", lerp(CFG.label.minFS, CFG.label.maxFS)+"px");
+      });
+      // back-platform-name
+      root.querySelectorAll(".back-platform-name").forEach(function(el){
+        el.style.setProperty("--bpn-fs", lerp(CFG.bpn.minFS, CFG.bpn.maxFS)+"px");
+      });
+      // back-value
+      root.querySelectorAll(".back-value").forEach(function(el){
+        el.style.setProperty("--bv-fs", lerp(CFG.bv.minFS, CFG.bv.maxFS)+"px");
+        el.style.setProperty("--bv-ls", lerpEm(CFG.bv.minLS, CFG.bv.maxLS)+"em");
+      });
+      // back-btn
+      root.querySelectorAll(".back-btn").forEach(function(el){
+        el.style.setProperty("--bb-fs", lerp(CFG.bb.minFS, CFG.bb.maxFS)+"px");
+      });
+      // hint
+      var hint = root.querySelector(".contact-hint");
+      if(hint){
+        hint.style.setProperty("--hint-fs", lerp(CFG.hint.minFS, CFG.hint.maxFS)+"px");
+        hint.style.setProperty("--hint-ls", lerpEm(CFG.hint.minLS, CFG.hint.maxLS)+"em");
+      }
     }
-    applyHintScale();
+
+    var root = document.getElementById("contactRoot");
+    if(!root) return;
+
+    var raf = 0;
+    function onResize(){
+      if(raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(function(){ applyScale(root); });
+    }
+
+    applyScale(root);
     if(window.ResizeObserver){
-      new ResizeObserver(function(){ requestAnimationFrame(applyHintScale); })
-        .observe(document.getElementById("contactRoot"));
+      new ResizeObserver(onResize).observe(root);
     } else {
-      window.addEventListener("resize", applyHintScale);
+      window.addEventListener("resize", onResize);
     }
-  }
+  })();
 
 })();
 </script>
