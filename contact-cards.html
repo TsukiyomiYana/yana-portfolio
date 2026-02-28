@@ -62,12 +62,9 @@ html, body {
 /* ===== CARD GRID ===== */
 .cards-grid {
   display: flex;
-  column-gap: 14px;
-  row-gap: 20px;
+  gap: 14px;
   justify-content: center;
-  flex-wrap: wrap;
-  overflow: visible;
-  padding: 8px 4px;
+  flex-wrap: nowrap;
 }
 
 /* ===== SINGLE CARD SCENE ===== */
@@ -78,7 +75,12 @@ html, body {
   perspective: 800px;
   cursor: pointer;
   flex-shrink: 0;
-  isolation: isolate;  /* 防止 3D transform 跨排互相干擾 */
+  position: relative;
+  z-index: 1;
+}
+.card-scene:hover,
+.card-scene.is-flipped {
+  z-index: 10;
 }
 
 /* hover lift */
@@ -327,7 +329,7 @@ html, body {
   opacity: 0.95;
   text-align: center;
   user-select: none;
-  margin-top: 1px;
+  margin-top: 10px;
 }
 
 /* ===== EXTERNAL LINK MODAL ===== */
@@ -455,7 +457,7 @@ html, body {
             <span class="card-index-suit">♠</span>
           </div>
           <div class="card-art">
-            <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Yana">
+            <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-poker-s01-962x1200-v1.webp" alt="Yana">
           </div>
           <div class="card-name-strip">Discord</div>
         </div>
