@@ -325,7 +325,7 @@ body {
     min-width: unset;
   }
   .char-imgs {
-    /* stack 後：margin-right をリセット、置中・幅を制限 */
+    /* stack 後：margin-right reset、置中・寬度限制 */
     margin-right: 0;
     width: clamp(200px, 72%, 320px);
     justify-content: center;
@@ -353,7 +353,7 @@ body {
   <!-- ===== ACCORDION LIST ===== -->
   <ul class="impornt-list" role="list">
 
-    <!-- ① 角色檔案 / キャラクタープロフィール / Character Profile -->
+    <!-- ① 角色檔案 -->
     <li class="impornt-item" data-item="char">
       <button class="impornt-toggle" aria-expanded="false" aria-controls="panel-char">
         <span class="t-icon">🧑</span>
@@ -469,67 +469,41 @@ body {
               <div class="process-steps">
 
                 <div class="process-step"><div class="step-num">1</div><div class="step-body">
-                  <p class="step-title">確認委託</p>
-                  <p>請先確認近期作品與委託規範，再透過 Email 或 Discord 與我聯繫。<br>
-                  ※ <strong>強烈建議以 Email 聯繫</strong>，回覆速度較快。<br>
-                  記得在信中寫下您的需求並附上設計圖與指示。<br>
-                  我會在 <strong>3 個工作日內</strong>回覆。</p>
+                  <p class="step-title">聯繫與報價</p>
+                  <p>請先確認近期作品與委託規範，再透過 Email 或 Discord 聯繫。<br>
+                  信中請附上需求說明、設計參考與預計使用的平台。<br>
+                  我會在 <strong>3 個工作日內</strong>回覆，並在討論後提供報價與預估時間。<br>
+                  ※ <strong>強烈建議以 Email 聯繫</strong>，回覆較快。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">2</div><div class="step-body">
-                  <p class="step-title">溝通細節・取得報價</p>
-                  <p>我將提供初步的製作方案，並在與客戶討論後，提供報價與預估的製作時間。</p>
+                  <p class="step-title">確認方案・訂金</p>
+                  <p>討論確認後，請支付 <strong>75%</strong> 訂金，收到款項後安排檔期進入正式製作。<br>
+                  ・2D 案件：製作前會先提供草稿，大幅修改請在此階段提出。<br>
+                  ・3D 案件：依報價方案直接進入製作，細節在各階段檢查點確認。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">3</div><div class="step-body">
-                  <p class="step-title">草稿確認（2D Only）</p>
-                  <p>提供草圖或初步概念供確認。<br>
-                  <strong>大幅修改請於此階段提出</strong>，草稿階段可修改至滿意為止。</p>
+                  <p class="step-title">正式製作</p>
+                  <p><strong>2D：</strong>線稿 → 上色 → 拆圖（加購）→ 完稿<br>
+                  <strong>3D：</strong>白模 → 貼圖 → 綁定 → 表情 → 引擎測試</p>
+                  <p>每個階段都會提交確認。修改請即時提出，後期修改可能產生額外費用。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">4</div><div class="step-body">
-                  <p class="step-title">訂金付款</p>
-                  <p>正式製作前請支付 <strong>75%</strong> 訂金。<br>
-                  未收到款項前不會開始作業。<br>
-                  確認訂金後，將為您安排檔期並進入正式製作。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">5</div><div class="step-body">
-                  <p class="step-title">開始製作</p>
-                  <p><strong>2D：</strong>線稿 → 上色 → 拆圖・補遮罩（加購選項）→ 完稿<br>
-                  <strong>3D：</strong>白模 → 貼圖 → 骨骼綁定 → 表情設定（如有）→ 簡易動畫（如有）→ 引擎測試</p>
-                  <p>・每個階段都會提交給客戶進行確認。<br>
-                  ・貼圖繪製會盡可能維持繪師風格。</p>
-                  <p>※ 3D 模型有許多不可逆環節，每個製作階段都會設立檢查點以供確認。<br>
-                  ※ 修改請即時提出，日後提出可能會產生額外費用與時間。<br>
-                  ※ 基本無限修改，但過多或超出預期的修正將斟酌收取額外費用。<br>
-                  ※ 若有不可抗力的延遲，將盡可能提早主動告知。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">6</div><div class="step-body">
-                  <p class="step-title">最終確認</p>
-                  <p>成品交由客戶確認。<strong>不接受第三方介入的隔空確認。</strong></p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">7</div><div class="step-body">
-                  <p class="step-title">尾款付款</p>
-                  <p>交付最終檔案前，請先支付剩餘 <strong>25%</strong> 尾款。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">8</div><div class="step-body">
-                  <p class="step-title">交付最終檔案</p>
-                  <p>提供檔案供客戶測試與細部微調，最後將成品及原始檔提交給客戶。<br>
-                  此階段<strong>不接受大幅修改</strong>，任何大幅修改都可能演變成重新製作。<br>
-                  為了彼此寶貴的時間，請在各個檢查點及時提出修改要求，感謝您的諒解。</p>
-                  <p>※ 檔案透過雲端提供，僅限數位檔，無實體寄送。<br>
-                  ・2D 插圖：提供 .png。 .psd 需加購（拆圖案件除外）<br>
-                  ・Live2D：提供 VTube Studio 可用格式（.moc3、 .json、紋理貼圖）<br>
-                  ・3D：相容於 Unity / VRChat 等數據格式</p>
+                  <p class="step-title">最終確認・尾款</p>
+                  <p>成品交由客戶本人確認，<strong>不接受第三方代為確認</strong>。<br>
+                  確認後支付剩餘 <strong>25%</strong> 尾款。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">✓</div><div class="step-body">
                   <p class="step-title">交付完成</p>
-                  <p>感謝您的委託！</p>
+                  <p>透過雲端交付最終檔案與原始檔（僅數位檔，無實體寄送）。<br>
+                  ・2D：.png（.psd 需加購）<br>
+                  ・Live2D：.moc3 / .json<br>
+                  ・3D：Unity / VRChat 格式<br>
+                  ※此階段不接受大幅修改。<br>
+                  感謝您的委託！</p>
                 </div></div>
 
               </div>
@@ -540,68 +514,41 @@ body {
               <div class="process-steps">
 
                 <div class="process-step"><div class="step-num">1</div><div class="step-body">
-                  <p class="step-title">依頼内容の確認</p>
+                  <p class="step-title">お問い合わせ・お見積り</p>
                   <p>最近の作品と依頼規約をご確認の上、Email または Discord よりご連絡ください。<br>
-                  ※ <strong>Email でのご連絡を強くおすすめします</strong>（返信が早いため）。<br>
-                  ご要望・デザイン資料・指示書をメールに添付してお送りください。<br>
-                  <strong>3 営業日以内</strong>にご返信いたします。</p>
-
+                  ご要望・デザイン資料・使用予定のプラットフォームをお知らせください。<br>
+                  <strong>3 営業日以内</strong>にご返信し、打ち合わせ後にお見積りと想定制作期間をお出しします。<br>
+                  ※ <strong>Email でのご連絡を強くおすすめします</strong>（返信が早いため）。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">2</div><div class="step-body">
-                  <p class="step-title">詳細のヒアリング・お見積もり</p>
-                  <p>デザイン資料・指示書をもとに制作プランをご提案し、打ち合わせ後におよそのお見積りと想定制作期間をお出しします。</p>
+                  <p class="step-title">制作プラン確認・着手金</p>
+                  <p>内容確認後、お見積もり金額の <strong>75%</strong> をお支払いください。ご入金確認後、スケジュールを確保し制作へ進みます。<br>
+                  ・2D 案件：制作前にラフをご提出します。大幅な修正はこの段階でご提示ください。<br>
+                  ・3D 案件：お見積りプランに沿って制作開始。詳細は各チェックポイントで確認します。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">3</div><div class="step-body">
-                  <p class="step-title">ラフ確認（2Dのみ）</p>
-                  <p>ラフをご提出し、ご確認いただきます。<br>
-                  <strong>大幅な修正はこの段階でご提示ください</strong>ラフ段階ではご納得いただけるまで調整可能です。</p>
+                  <p class="step-title">本制作</p>
+                  <p><strong>2D：</strong>線画 → 着色 → レイヤー分け（オプション）→ 仕上げ<br>
+                  <strong>3D：</strong>ベースメッシュ → テクスチャ → リギング → 表情設定 → エンジンテスト</p>
+                  <p>各段階ごとにご確認いただきます。修正はお早めにお知らせください。後からの修正は追加費用が発生する場合があります。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">4</div><div class="step-body">
-                  <p class="step-title">着手金のお支払い</p>
-                  <p>本制作開始前に、お見積もり金額の <strong>75%</strong> をお支払いください。<br>
-                  ご入金確認前は作業を開始いたしません。<br>
-                  着手金確認後、スケジュールを確保し正式制作へ進みます。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">5</div><div class="step-body">
-                  <p class="step-title">本制作</p>
-                  <p><strong>2D：</strong>線画 → 着色 → レイヤー分け＆マスク補完（オプション）→ 仕上げ<br>
-                  <strong>3D：</strong>ベースメッシュ（白モデル） → テクスチャ → リギング → 表情設定（必要に応じて）→ 簡易アニメーション（オプション）→ エンジン動作テスト</p>
-                  <p>・各段階ごとにご確認用データを提出し確認お願いします。<br>
-                  ・テクスチャはできる限り絵師のスタイルを再現します。</p>
-                  <p>※ 3D モデルには不可逆な工程が多いため、各段階でチェックポイントを設けます。<br>
-                  ※ 修正はお早めにお知らせください。後からの修正は追加費用・追加時間が発生する場合があります。<br>
-                  ※ 基本的に修正回数の制限はありませんが、過度な修正や想定を超える修正は追加料金をいただく場合があります。<br>
-                  ※ 不可抗力による遅延が生じる場合、可能な限り早めにご連絡いたします。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">6</div><div class="step-body">
-                  <p class="step-title">最終確認</p>
-                  <p>完成品をお客様にご確認いただきます。<strong>第三者を介した伝聞での確認はお断りしております。</strong></p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">7</div><div class="step-body">
-                  <p class="step-title">残金のお支払い</p>
-                  <p>最終データの納品前に、残りの <strong>25%</strong> をお支払いください。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">8</div><div class="step-body">
-                  <p class="step-title">最終データの納品</p>
-                  <p>テストおよび細部の微調整用にデータをお渡しし、最終的に完成データと元データを提出します。<br>
-                  この段階では<strong>大幅な修正はお断りしております。</strong>大幅修正は再制作扱いになる可能性があります。<br>
-                  お互いの貴重なお時間を大切にするため、各チェックポイントで修正のご希望はお早めにお知らせいただけますと助かります。ご理解のほどよろしくお願いいたします。</p>
-                  <p>データはクラウド経由でお渡しします。デジタルデータのみで、物理発送はありません。<br>
-                  ・2D イラスト：.png 形式を提供。.psd は別途料金（レイヤー分け案件を除く）<br>
-                  ・Live2D：VTube Studio 対応形式（.moc3、 .json、テクスチャ）<br>
-                  ・3D：Unity / VRChat などに対応したデータ形式</p>
+                  <p class="step-title">最終確認・残金</p>
+                  <p>完成品をお客様ご本人に確認いただきます。<strong>第三者を介した確認はお断りしております。</strong><br>
+                  確認後、残りの <strong>25%</strong> をお支払いください。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">✓</div><div class="step-body">
                   <p class="step-title">納品完了</p>
-                  <p>ご依頼いただきありがとうございました！</p>
+                  <p>クラウド経由で最終データと元データを納品します（デジタルデータのみ、物理発送なし）。<br>
+                  ・2D：.png（.psd は別途料金）<br>
+                  ・Live2D：.moc3 / .json<br>
+                  ・3D：Unity / VRChat 形式<br>
+                  ※この段階では大幅な修正はお断りしております。<br>
+                  ご依頼いただきありがとうございました！</p>
                 </div></div>
 
               </div>
@@ -612,67 +559,41 @@ body {
               <div class="process-steps">
 
                 <div class="process-step"><div class="step-num">1</div><div class="step-body">
-                  <p class="step-title">Check Commission Info</p>
-                  <p>Please review my recent works and commission guidelines before reaching out via Email or Discord.<br>
-                  ※ <strong>Email is strongly recommended</strong> for a faster response.<br>
-                  Please include your requirements, references, and instructions in your message.<br>
-                  I will reply within <strong>3 business days</strong>.</p>
+                  <p class="step-title">Contact & Quote</p>
+                  <p>Please review my recent works and commission guidelines, then reach out via Email or Discord.<br>
+                  Include your requirements, design references, and target platform(s).<br>
+                  I will reply within <strong>3 business days</strong> and provide a quote and estimated timeline after discussion.<br>
+                  ※ <strong>Email is strongly recommended</strong> for a faster response.</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">2</div><div class="step-body">
-                  <p class="step-title">Details & Quote</p>
-                  <p>Based on references and instructions, I will propose a production plan. After our discussion, I will provide an estimated quote and production schedule.</p>
+                  <p class="step-title">Confirm Plan & Deposit</p>
+                  <p>Once confirmed, please pay a <strong>75%</strong> deposit. Production will be scheduled after payment is received.<br>
+                  ・2D projects: A rough draft will be provided first. Please raise any major changes at this stage.<br>
+                  ・3D projects: Production begins per the quoted plan. Details are confirmed at each checkpoint.</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">3</div><div class="step-body">
-                  <p class="step-title">Rough Draft (2D Only)</p>
-                  <p>I will provide a rough sketch for review.<br>
-                  <strong>Please raise any major changes at this stage.</strong> Revisions can be made until you're satisfied.</p>
+                  <p class="step-title">Production</p>
+                  <p><strong>2D:</strong> Line art → Coloring → Layer separation (add-on) → Final<br>
+                  <strong>3D:</strong> Base mesh → Texturing → Rigging → Blend shapes → Engine testing</p>
+                  <p>Each stage will be submitted for review. Please raise revisions promptly — late changes may incur extra fees.</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">4</div><div class="step-body">
-                  <p class="step-title">Deposit Payment</p>
-                  <p>A <strong>75%</strong> deposit is required before production starts.<br>
-                  Work will not begin until payment is received.<br>
-                  Once the deposit is confirmed, I will schedule your slot and proceed  to production.</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">5</div><div class="step-body">
-                  <p class="step-title">Production</p>
-                  <p><strong>2D：</strong>Line art → Coloring → Layer Separation &amp; Mask (Add-on Option) → Final<br>
-                  <strong>3D：</strong>Base mesh (untextured) → Texturing → Rigging → Blend shapes (if need) → Simple Animations (if added) → Engine testing</p>
-                  <p>・Each stage will be submitted for review.<br>
-                  ・Textures will be painted to match the artist's style as closely as possible.</p>
-                  <p>※ 3D production includes many irreversible steps, so checkpoints will be set for confirmation at each stage.<br>
-                  ※ Please raise revisions promptly. Late changes may require additional time and fees.<br>
-                  ※ Revisions are generally unlimited, but excessive or out-of-scope changes may incur extra charges.<br>
-                  ※ If delays occur due to force majeure, I will inform you as early as possible.</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">6</div><div class="step-body">
-                  <p class="step-title">Final Review</p>
-                  <p>The final work will be reviewed by the client. <strong>Third-party approvals are not accepted.</strong></p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">7</div><div class="step-body">
-                  <p class="step-title">Final Payment</p>
-                  <p>Please pay the remaining <strong>25%</strong> before delivering the final files.</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">8</div><div class="step-body">
-                  <p class="step-title">Deliver Final Files</p>
-                  <p>Files will be provided for testing and minor tweaks, then the final deliverables and source files will be submitted.<br>
-                  At this stage, <strong>major changes are not accepted</strong>. Any major change may be treated as a remake.<br>
-                  To make the best use of both our time, I’d appreciate it if you could point out any requested changes early at each checkpoint. Thank you for your understanding.</p>
-                  <p>※ Files are delivered via cloud storage. Digital files only; NO physical shipping.<br>
-                  ・2D Illustration: .png provided. .psd is an add-on (except for Layer-separated commissions).<br>
-                  ・Live2D: VTube Studio compatible files (.moc3, .json, texture files)<br>
-                  ・3D: Compatible with Unity / VRChat and related formats.</p>
+                  <p class="step-title">Final Review & Payment</p>
+                  <p>The final work will be reviewed by the client in person. <strong>Third-party approvals are not accepted.</strong><br>
+                  After approval, please pay the remaining <strong>25%</strong>.</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">✓</div><div class="step-body">
                   <p class="step-title">Delivery Complete</p>
-                  <p>Thank you so much for your commission!</p>
+                  <p>Final files and source files are delivered via cloud storage (digital only, no physical shipping).<br>
+                  ・2D: .png (.psd is an add-on) <br>
+                  ・Live2D: .moc3 / .json<br>
+                  ・3D: Unity / VRChat formats<br>
+                  ※Major changes are not accepted at this stage.<br>
+                  Thank you for your commission!</p>
                 </div></div>
 
               </div>
@@ -705,77 +626,40 @@ body {
               <div class="process-steps">
 
                 <div class="process-step"><div class="step-num">1</div><div class="step-body">
-                  <p class="step-title">委託基本內容</p>
+                  <p class="step-title">委託內容</p>
                   <p><strong>2D：</strong>Q版貼圖、SD Chibi<br>
-                  <strong>3D：</strong>道具、小吉祥物（含貼圖、基本綁定）</p>
-                  <p>※ 僅接受原創、或已取得權利方正式授權的角色。<br>
-                  ※ 來信請包含：<br>
-                  　a. 說明主要用途及所需規格<br>
-                  　b. 能看清整體造型的設計參考<br>
-                  　c. 預計使用的平台或所需檔案格式</p>
+                  <strong>3D：</strong>道具、小吉祥物（含貼圖與基本綁定）</p>
+                  <p>※僅接受原創或已取得授權的角色。複雜設計或特殊平台設定需額外費用。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">2</div><div class="step-body">
-                  <p class="step-title">提供的檔案類型</p>
-                  <p>※ 檔案透過雲端提供，僅限數位檔，無實體寄送。<br>
-                  ・2D 插圖：提供 .png。 .psd 需加購（拆圖案件除外）<br>
-                  ・Live2D：提供 VTube Studio 可用格式（.moc3、 .json、紋理貼圖）<br>
-                  ・3D：相容於 Unity / VRChat 等數據格式</p>
+                  <p class="step-title">授權範圍</p>
+                  <p>報價已含基本商用授權，可用於各平台、遊戲、直播串流。<br>
+                  ※禁止拆解、商品化或第三方販售。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">3</div><div class="step-body">
-                  <p class="step-title">可追加項目 <span style="font-weight:400;opacity:.7;font-size:.9em;">（需額外費用）</span></p>
-                  <p><strong>2D：</strong><br>
-                  ※ .psd 拆圖<br>
-                  ※ 過於複雜的設計<br></p>
-
-                  <p><strong>3D：</strong><br>
-                  ※ 過於複雜的設計<br>
-                  ※ 不同的平台環境設定<br>
-                  ※ 其他須使用到付費插件等設定<br></p>
+                  <p class="step-title">付款與取消</p>
+                  <p>透過 <strong>Wise / PayPal</strong> 支付，也可透過 <strong>VGen</strong> 委託（平台手續費 5% 由客戶負擔）。<br>
+                  訂金付款後訂單成立，取消<strong>不退還訂金</strong>。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">4</div><div class="step-body">
-                  <p class="step-title">授權範圍</p>
-                  <p><strong>商用許可</strong><br>
-                  報價費用皆已包含基本的商業使用授權，可進行各類平台、直播串流使用。<br>
-                  但禁止拆解、商品化、或進行第三方販售。</p>
+                  <p class="step-title">製作時間</p>
+                  <p>依設計複雜度而異，約需 <strong>30～60 個工作天</strong>。<br>
+                  ※此為參考值，設計越複雜所需時間越長。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">5</div><div class="step-body">
-                  <p class="step-title">製作時間</p>
-                  <p>不同設計、不同要求會有不同的製作週期，較難以一言概括。<br>
-                  但約需至少 <strong>30〜60 個工作天</strong>。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">6</div><div class="step-body">
-                  <p class="step-title">付款方式</p>
-                  <p>可透過 <strong>Wise / PayPal</strong> 支付。<br>
-                  如有疑慮，也可透過第三方平台 <strong>VGen</strong> 委託，<br>
-                  但平台手續費 5% 須由客戶負擔。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">7</div><div class="step-body">
-                  <p class="step-title">修改次數與限制</p>
-                  <p>3D 模型有許多不可逆環節，每個製作階段都會設立檢查點以供確認。<br>
-                  修改請即時提出，日後提出可能會產生額外費用與時間。<br>
-                  ※ 基本無限修改，但過多或超出預期的修正將斟酌收取額外費用。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">8</div><div class="step-body">
-                  <p class="step-title">取消訂單</p>
-                  <p>支付訂金後訂單即成立，若需要取消將<strong>不退回訂金</strong>，還請特別注意。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">9</div><div class="step-body">
-                  <p class="step-title">其餘相關需求</p>
-                  <p>歡迎來信詢問，我不一定會滿足需求，但有問有機會 (?)</p>
+                  <p class="step-title">修改政策</p>
+                  <p>各階段設有檢查點，基本不限修改次數。<br>
+                  但過多或超出預期的修正將酌收額外費用。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">!</div><div class="step-body">
                   <p class="step-title">最重要的一點</p>
-                  <p>我是住在海外（加拿大）的狼隻，請諒解並留意我的時區。<br>
-                  或許狼是夜行動物，但不代表不需要睡覺 ᓚ₍⑅^- .-^₎ -ᶻ 𝗓 𐰁<br>
+                  <p>我是住在海外（加拿大）的狼隻，請留意時區差異。<br>
+                  狼或許是夜行動物，但不代表不需要睡覺 ᓚ₍⑅^- .-^₎ -ᶻ 𝗓 𐰁<br>
                   感謝您們的體諒 (* ᴗ ᴗ))ﾍﾟｺﾘ</p>
                 </div></div>
 
@@ -789,69 +673,32 @@ body {
                 <div class="process-step"><div class="step-num">1</div><div class="step-body">
                   <p class="step-title">依頼可能な内容</p>
                   <p><strong>2D：</strong>スタンプ、SD Chibi<br>
-                  <strong>3D：</strong>小道具（小物）、マスコット（テクスチャ・基本リギング込み）</p>
-                  <p>※ オリジナルキャラクター、または権利元の正式な許可を得ているキャラクターのみ受付します。<br>
-                  ※ ご連絡の際は、下記を必ずご記載ください：<br>
-                  　a. 用途と必要スペック<br>
-                  　b. 全体が確認できる参考資料<br>
-                  　c. 使用予定のプラットフォームや必要なファイル形式</p>
+                  <strong>3D：</strong>小道具、マスコット（テクスチャ・基本リギング込み）</p>
+                  <p>※ オリジナルまたは正式許可のあるキャラクターのみ。複雑なデザインや特殊な環境設定は追加料金。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">2</div><div class="step-body">
-                  <p class="step-title">提供ファイル形式</p>
-                  <p>データはクラウド経由でお渡しします。デジタルデータのみで、物理発送はありません。<br>
-                  ・2D イラスト：.png 形式を提供。.psd は別途料金（レイヤー分け案件を除く）<br>
-                  ・Live2D：VTube Studio 対応形式（.moc3、 .json、テクスチャ）<br>
-                  ・3D：Unity / VRChat などに対応したデータ形式</p>
+                  <p class="step-title">使用許諾範囲</p>
+                  <p>お見積りには基本的な商用利用ライセンスが含まれており、各種プラットフォームやゲームや配信でご利用いただけます。<br>
+                  ※分解・商品化・第三者への販売は禁止します。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">3</div><div class="step-body">
-                  <p class="step-title">追加オプション <span style="font-weight:400;opacity:.7;font-size:.9em;">（別途料金）</span></p>
-                  <p><strong>2D：</strong><br>
-                  ※ .psd レイヤー分け<br>
-                  ※ 複雑すぎるデザイン</p>
-                  <p><strong>3D：</strong><br>
-                  ※ 複雑すぎるデザイン<br>
-                  ※ 異なるプラットフォーム環境設定<br>
-                  ※ 有料プラグイン等が必要な設定</p>
+                  <p class="step-title">お支払い・キャンセル</p>
+                  <p><strong>Wise / PayPal</strong> にて承ります。<strong>VGen</strong> 経由も可能ですが、手数料 5% はご依頼者様負担となります。<br>
+                  着手金のお支払いをもって注文成立。キャンセルの場合、<strong>着手金の返金はいたしません</strong>。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">4</div><div class="step-body">
-                  <p class="step-title">使用許諾範囲</p>
-                  <p><strong>商用利用可</strong><br>
-                  お見積りには基本的な商用利用ライセンスが含まれており、各種プラットフォームや配信活動でご利用いただけます。<br>
-                  ただし、分解・再配布・商品化、または第三者への販売は固く禁止します。</p>
+                  <p class="step-title">制作期間</p>
+                  <p>デザインや要件により異なりますが、目安として <strong>30〜60 営業日</strong>ほどかかります。<br>
+                  ※あくまで目安であり、複雑なデザインほど制作期間が長くなります。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">5</div><div class="step-body">
-                  <p class="step-title">制作期間</p>
-                  <p>デザインや要件によって制作期間は異なりますが、<br>
-                  目安として <strong>30〜60 営業日</strong>ほどかかります。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">6</div><div class="step-body">
-                  <p class="step-title">お支払い方法</p>
-                  <p><strong>Wise / PayPal</strong> にて承ります。<br>
-                  ご不安な方は第三者プラットフォーム <strong>VGen</strong> 経由でもご依頼いただけますが、<br>
-                  プラットフォーム手数料 5% はご依頼者様にご負担いただきます。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">7</div><div class="step-body">
-                  <p class="step-title">修正回数と制限</p>
-                  <p>3D モデルには不可逆な工程が多いため、各段階でチェックポイントを設けます。<br>
-                  修正はお早めにお知らせください。後からの修正は追加費用・追加時間が発生する場合があります。<br>
-                  ※ 基本的に修正回数の制限はありませんが、過度な修正や想定を超える修正は追加料金をいただく場合があります。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">8</div><div class="step-body">
-                  <p class="step-title">キャンセルについて</p>
-                  <p>着手金のお支払いをもってご注文成立となります。<br>
-                  キャンセルの場合、<strong>着手金の返金はいたしません</strong>のでご注意ください。</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">9</div><div class="step-body">
-                  <p class="step-title">その他のご要望</p>
-                  <p>お気軽にご相談ください。必ずしも対応できるとは限りませんが、聞くだけならタダです(?)</p>
+                  <p class="step-title">修正について</p>
+                  <p>各段階でチェックポイントを設けており、基本的に修正回数の制限はありません。<br>
+                  ただし、過度な修正や想定を超える修正は追加料金をいただく場合があります。</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">!</div><div class="step-body">
@@ -870,70 +717,33 @@ body {
 
                 <div class="process-step"><div class="step-num">1</div><div class="step-body">
                   <p class="step-title">Commission Basics</p>
-                  <p><strong>2D：</strong>Chibi stickers, SD Chibi<br>
-                  <strong>3D：</strong>Props, Small Mascots (includes texturing & basic rigging)</p>
-                  <p>※ Accept original characters only, or characters you have official permission from the rights holder to use.<br>
-                  ※ Please include the following in your inquiry:<br>
-                  　a. Primary purpose and required specifications.<br>
-                  　b. Clear design references showing the full outfit.<br>
-                  　c. Target platform(s) and required file format(s).</p>
+                  <p><strong>2D:</strong> Chibi stickers, SD Chibi<br>
+                  <strong>3D:</strong> Props, Small Mascots (includes texturing & basic rigging)</p>
+                  <p>※ Original or officially authorized characters only. Complex designs or special platform setups require extra fees.</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">2</div><div class="step-body">
-                  <p class="step-title">Deliverable File Types</p>
-                  <p>※ Files are delivered via cloud storage. Digital files only; NO physical shipping.<br>
-                  ・2D Illustration: .png provided. .psd is an add-on (except for Layer-separated commissions).<br>
-                  ・Live2D: VTube Studio compatible files (.moc3, .json, texture files)<br>
-                  ・3D: Compatible with Unity / VRChat and related formats.</p>
+                  <p class="step-title">License & Usage</p>
+                  <p>All quotes include a basic commercial-use license for streaming, game, and cross-platform use.<br>
+                  Disassembly, merchandising, and third-party resale are not permitted.</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">3</div><div class="step-body">
-                  <p class="step-title">Add-ons <span style="font-weight:400;opacity:.7;font-size:.9em;">(extra cost)</span></p>
-                  <p><strong>2D：</strong><br>
-                  ※ .psd layered file (parts separated).<br>
-                  ※ Highly complex designs</p>
-                  <p><strong>3D：</strong><br>
-                  ※ Highly complex designs<br>
-                  ※ Multi-platform environment setup.<br>
-                  ※ Setups that require paid plugins, etc.</p>
+                  <p class="step-title">Payment & Cancellation</p>
+                  <p>Payment via <strong>Wise / PayPal</strong>. Commissions through <strong>VGen</strong> are also accepted (5% platform fee covered by client).<br>
+                  Orders are confirmed upon deposit. <strong>Deposits are non-refundable</strong>.</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">4</div><div class="step-body">
-                  <p class="step-title">License & Usage Rights</p>
-                  <p><strong>Commercial use included</strong><br>
-                  All quotes include a basic commercial-use license for streaming and cross-platform use.<br>
-                  However, disassembly, redistribution, merchandising, and third-party resale are not permitted</p>
+                  <p class="step-title">Production Time</p>
+                  <p>Varies by complexity — expect at least <strong>30–60 business days</strong> as a guideline.<br>
+                  ※This is a rough estimate; more complex designs will require more time.</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">5</div><div class="step-body">
-                  <p class="step-title">Production Time</p>
-                  <p>Timelines vary depending on design complexity and requirements, so it's difficult to give a single answer.<br>
-                  As a general guideline, please expect at least <strong>30–60 business days</strong>.</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">6</div><div class="step-body">
-                  <p class="step-title">Payment Methods</p>
-                  <p>Payment via <strong>Wise / PayPal</strong> is available.<br>
-                  If you'd prefer a safer option, commissions through the third-party platform <strong>VGen</strong> are also accepted.<br>
-                  Please note that the platform fee of 5% will be covered by the client.</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">7</div><div class="step-body">
-                  <p class="step-title">Revisions & Limitations</p>
-                  <p>3D production includes many irreversible steps, so checkpoints will be set for confirmation at each stage.<br>
-                  Please raise revisions promptly. Late changes may require additional time and fees.<br>
-                  ※ Revisions are generally unlimited, but excessive or out-of-scope changes may incur extra charges.</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">8</div><div class="step-body">
-                  <p class="step-title">Order Cancellation</p>
-                  <p>An order is confirmed upon receipt of the deposit.<br>
-                  Please note that <strong>deposits are non-refundable</strong> in the event of a cancellation.</p>
-                </div></div>
-
-                <div class="process-step"><div class="step-num">9</div><div class="step-body">
-                  <p class="step-title">Other Requests</p>
-                  <p>Feel free to ask! I cannot guarantee I can accommodate everything, but it never hurts to ask (?).</p>
+                  <p class="step-title">Revision Policy</p>
+                  <p>Checkpoints are set at each stage. Revisions are generally unlimited,<br>
+                  but excessive or out-of-scope changes may incur extra charges.</p>
                 </div></div>
 
                 <div class="process-step"><div class="step-num">!</div><div class="step-body">
@@ -1140,15 +950,15 @@ body {
     document.documentElement.setAttribute("data-lang", lang);
   }
 
-  // 預設繁中，等父頁面傳來正確語言
+  // 預設繁中
   setLang("tw");
 
-  // 接收來自 Carrd 父頁面的語言訊息
+  // 接收來自 Carrd 頁面的語言訊息
   window.addEventListener("message", function(e){
     if(e.data && e.data.type === "set-lang"){
       setLang(e.data.lang);
     }
-    // 同時處理高度訊息（不衝突）
+    // 同時處理高度訊息
   });
 
   /* ===== 2. Responsive font scaling ===== */
