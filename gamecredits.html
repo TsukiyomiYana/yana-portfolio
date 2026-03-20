@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GAME CREDITS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --brown:     #3A2F2A;
+  --brown-mid: #6B5A4C;
+  --brown-lt:  #A0887A;
+}
+
+html, body {
+  background: transparent;
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  color: #3A2F2A;
+  -webkit-font-smoothing: antialiased;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+/* ===== WRAPPER ===== */
+.gc-wrap {
+  --fs: 14px;
+  --fs-title: 11px;
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 12px 0 24px;
+  font-size: var(--fs);
+}
+
+/* ===== HEADING ===== */
+.gc-heading {
+  text-align: center;
+  font-size: calc(var(--fs) * 1.15);
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: #3A2F2A;
+  margin-bottom: 4px;
+  opacity: 0.9;
+}
+
+/* ===== SUB HEADING ===== */
+.gc-subheading {
+  text-align: center;
+  font-size: calc(var(--fs) * 0.85);
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #3A2F2A;
+  opacity: 0.55;
+  margin-bottom: 8px;
+}
+
+/* ===== DESC ===== */
+.gc-desc {
+  text-align: center;
+  font-size: var(--fs);
+  line-height: 1.72;
+  color: #3E3127;
+  font-weight: 400;
+  margin-bottom: 18px;
+}
+
+/* ===== SLIDER CONTAINER ===== */
+.gc-slider {
+  position: relative;
+}
+
+/* ===== TRACK ===== */
+.gc-track {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding: 4px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.gc-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* ===== CARD ===== */
+.gc-card {
+  flex: 0 0 calc(50% - 6px);
+  scroll-snap-align: start;
+  background: rgba(58,47,42,.04);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(58,47,42,.12);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.gc-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 2px 8px rgba(58,47,42,.08);
+}
+
+/* ===== COVER IMAGE ===== */
+.gc-cover {
+  width: 100%;
+  aspect-ratio: 616 / 353;
+  object-fit: cover;
+  display: block;
+  background: rgba(58,47,42,.05);
+}
+
+/* ===== CARD INFO ===== */
+.gc-info {
+  padding: 10px 12px 12px;
+}
+
+.gc-name {
+  font-size: var(--fs);
+  font-weight: 500;
+  color: #3A2F2A;
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+
+.gc-badge {
+  display: inline-block;
+  background: #4A8C5C;
+  color: #FFFFFF;
+  font-size: calc(var(--fs) * 0.72);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+/* ===== ARROWS ===== */
+.gc-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.85);
+  color: #3A2F2A;
+  border: 1px solid rgba(58,47,42,.15);
+  box-shadow: 0 2px 8px rgba(58,47,42,.10);
+  font-size: 18px;
+  cursor: pointer;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.gc-arrow:hover {
+  background: rgba(255,255,255,.95);
+}
+
+.gc-arrow-l { left: 6px; }
+.gc-arrow-r { right: 6px; }
+
+.gc-slider:hover .gc-arrow:not(.gc-hidden) {
+  opacity: 1;
+}
+
+.gc-hidden {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+/* ===== LANGUAGE VISIBILITY ===== */
+:root[data-lang="tw"] .lang-ja,
+:root[data-lang="tw"] .lang-en { display: none !important; }
+:root[data-lang="ja"] .lang-tw,
+:root[data-lang="ja"] .lang-en { display: none !important; }
+:root[data-lang="en"] .lang-tw,
+:root[data-lang="en"] .lang-ja { display: none !important; }
+
+/* ===== EXTERNAL LINK MODAL（與 contact-cards 一致） ===== */
+.ext-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(58,47,42,.38);
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.ext-overlay.is-open { display: flex; }
+
+.ext-modal {
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(58,47,42,.14);
+  border-radius: 16px;
+  padding: 24px 22px 20px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(58,47,42,.18);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.ext-modal-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.ext-modal-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
+.ext-modal-body {
+  font-size: 11.5px;
+  color: var(--brown-mid);
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+.ext-modal-url {
+  font-size: 10px;
+  color: var(--brown-lt);
+  letter-spacing: 0.02em;
+  word-break: break-all;
+  background: rgba(58,47,42,.05);
+  border-radius: 6px;
+  padding: 5px 10px;
+  width: 100%;
+}
+.ext-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.ext-modal-cancel {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(58,47,42,.22);
+  background: transparent;
+  color: var(--brown);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.ext-modal-cancel:hover { background: rgba(58,47,42,.06); }
+.ext-modal-go {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: none;
+  background: var(--brown);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .15s;
+}
+.ext-modal-go:hover { opacity: .82; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+  .gc-info {
+    padding: 8px 10px 10px;
+  }
+
+  .gc-arrow {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+
+  .gc-slider .gc-arrow:not(.gc-hidden) {
+    opacity: 0.7;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="gc-wrap" id="gcRoot">
+
+  <!-- ===== 標題區 ===== -->
+
+  <p class="gc-desc">
+    <span class="lang-tw">以下遊戲使用了本人製作的 3D 素材</span>
+    <span class="lang-ja">以下のゲームに本人制作の 3D アセットが使用されています</span>
+    <span class="lang-en">The following games use 3D assets created by me</span>
+  </p>
+
+  <!-- ===== 輪播區 ===== -->
+  <!--
+  📌 新增遊戲：複製任一個 <a class="gc-card"> 區塊，
+  修改 ① href ② img src ③ 三語名稱 ④ 好評率
+  -->
+
+  <div class="gc-slider">
+
+    <button class="gc-arrow gc-arrow-l" aria-label="上一個">&#8249;</button>
+
+    <div class="gc-track">
+
+      <!-- 卡片 1：家屋探索 -->
+      <a class="gc-card"
+         href="https://store.steampowered.com/app/3053390/"
+         target="_blank"
+         rel="noopener noreferrer">
+        <img class="gc-cover"
+             src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-houseexploration-s01-616x353-v1.webp"
+             alt="家屋探索 Japanese House Exploration">
+        <div class="gc-info">
+          <p class="gc-name">
+            <span class="lang-tw">家屋探索 — Japanese House Exploration</span>
+            <span class="lang-ja">家屋探索 — Japanese House Exploration</span>
+            <span class="lang-en">Japanese House Exploration</span>
+          </p>
+          <span class="gc-badge">
+            <span class="lang-tw">Steam 好評率 95%</span>
+            <span class="lang-ja">Steam 高評価 95%</span>
+            <span class="lang-en">95% positive on Steam</span>
+          </span>
+        </div>
+      </a>
+
+      <!-- 卡片 2：Debug Deadline -->
+      <a class="gc-card"
+         href="https://store.steampowered.com/app/3344750/"
+         target="_blank"
+         rel="noopener noreferrer">
+        <img class="gc-cover"
+             src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-debugdead-s01-616x353-v1.webp"
+             alt="Debug Deadline">
+        <div class="gc-info">
+          <p class="gc-name">
+            <span class="lang-tw">Debug Deadline</span>
+            <span class="lang-ja">Debug Deadline</span>
+            <span class="lang-en">Debug Deadline</span>
+          </p>
+          <span class="gc-badge">
+            <span class="lang-tw">Steam 好評率 91%</span>
+            <span class="lang-ja">Steam 高評価 91%</span>
+            <span class="lang-en">91% positive on Steam</span>
+          </span>
+        </div>
+      </a>
+
+      <!-- 📌 新增更多遊戲請貼在這裡 -->
+
+    </div>
+
+    <button class="gc-arrow gc-arrow-r" aria-label="下一個">&#8250;</button>
+
+  </div>
+</div>
+
+<!-- External link confirmation modal（與 contact-cards 一致） -->
+<div class="ext-overlay" id="extOverlay" role="dialog" aria-modal="true">
+  <div class="ext-modal">
+    <div class="ext-modal-icon">🔗</div>
+    <div class="ext-modal-title">
+      <span class="lang-tw">即將離開本站</span>
+      <span class="lang-ja">外部リンクへ移動</span>
+      <span class="lang-en">Leaving this site</span>
+    </div>
+    <div class="ext-modal-body">
+      <span class="lang-tw">您將前往 Tsukiyomi Yana 以外的外部網頁。</span>
+      <span class="lang-ja">Tsukiyomi Yana のサイトを離れて外部リンクにアクセスします。</span>
+      <span class="lang-en">You're about to leave Tsukiyomi Yana's Website and visit an external link.</span>
+    </div>
+    <div class="ext-modal-url" id="extUrl"></div>
+    <div class="ext-modal-actions">
+      <button class="ext-modal-cancel" id="extCancel">
+        <span class="lang-tw">取消</span>
+        <span class="lang-ja">キャンセル</span>
+        <span class="lang-en">Cancel</span>
+      </button>
+      <a class="ext-modal-go" id="extGo" href="#" target="_blank" rel="noopener">
+        <span class="lang-tw">前往</span>
+        <span class="lang-ja">移動する</span>
+        <span class="lang-en">Continue</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+
+<script>
+(function(){
+
+  /* ===== 1. Language sync via postMessage (cross-origin) ===== */
+  function setLang(lang){
+    if(lang !== "tw" && lang !== "ja" && lang !== "en") lang = "tw";
+    document.documentElement.setAttribute("data-lang", lang);
+    setTimeout(reportHeight, 50);
+  }
+
+  setLang("tw");
+
+  window.addEventListener("message", function(e){
+    if(e.data && e.data.type === "set-lang"){
+      setLang(e.data.lang);
+    }
+  });
+
+  /* ===== 2. Responsive font scaling ===== */
+  var root = document.getElementById("gcRoot");
+  var CFG = {
+    minW: 520, maxW: 1040,
+    minFS: 12, maxFS: 15,
+    minTitleFS: 13, maxTitleFS: 15
+  };
+
+  function clamp(n,a,b){ return Math.max(a,Math.min(b,n)); }
+
+  function applyScale(){
+    if(!root) return;
+    var w = root.getBoundingClientRect().width;
+    var t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
+    var fs = CFG.minFS + (CFG.maxFS - CFG.minFS) * t;
+    var tfs = CFG.minTitleFS + (CFG.maxTitleFS - CFG.minTitleFS) * t;
+    root.style.setProperty("--fs", fs.toFixed(2) + "px");
+    root.style.setProperty("--fs-title", tfs.toFixed(2) + "px");
+  }
+
+  applyScale();
+  if(window.ResizeObserver && root){
+    var ro = new ResizeObserver(function(){
+      requestAnimationFrame(applyScale);
+    });
+    ro.observe(root);
+  } else {
+    window.addEventListener("resize", applyScale);
+  }
+
+  /* ===== 3. Auto height: report ONLY at explicit moments, no observers ===== */
+  var _lastH = 0;
+  function reportHeight(){
+    var el = document.getElementById("gcRoot");
+    if(!el) return;
+    var h = Math.ceil(el.offsetHeight) + 32;
+    if(h === _lastH) return;
+    _lastH = h;
+    try{ window.parent.postMessage({ type:"gc-height", height:h }, "*"); }catch(e){}
+  }
+
+  setTimeout(reportHeight, 0);
+  setTimeout(reportHeight, 300);
+  setTimeout(reportHeight, 800);
+  setTimeout(reportHeight, 1500);
+
+  /* ===== 4. External link modal（與 contact-cards 一致） ===== */
+  var overlay   = document.getElementById("extOverlay");
+  var extUrlEl  = document.getElementById("extUrl");
+  var extGo     = document.getElementById("extGo");
+  var extCancel = document.getElementById("extCancel");
+
+  function openModal(href){
+    extUrlEl.textContent = href;
+    extGo.href = href;
+    overlay.classList.add("is-open");
+  }
+  function closeModal(){
+    overlay.classList.remove("is-open");
+    extGo.href = "#";
+    extUrlEl.textContent = "";
+  }
+
+  /* 攔截卡片點擊 → 顯示外部連結警告 */
+  document.addEventListener("click", function(e){
+    var card = e.target.closest(".gc-card");
+    if(!card) return;
+    var href = card.getAttribute("href");
+    if(!href || href === "#") return;
+    e.preventDefault();
+    openModal(href);
+  });
+
+  extCancel.addEventListener("click", closeModal);
+  extGo.addEventListener("click", function(){ setTimeout(closeModal, 80); });
+  overlay.addEventListener("click", function(e){
+    if(e.target === overlay) closeModal();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") closeModal();
+  });
+
+  /* ===== 5. Slider（循環模式） ===== */
+  var track  = document.querySelector('.gc-track');
+  var arrowL = document.querySelector('.gc-arrow-l');
+  var arrowR = document.querySelector('.gc-arrow-r');
+
+  if(!track || !arrowL || !arrowR) return;
+
+  function getScrollAmount(){
+    var card = track.querySelector('.gc-card');
+    if(!card) return 200;
+    return card.offsetWidth + 12;
+  }
+
+  /* 判斷是否需要滾動（內容有沒有超出容器） */
+  function canScroll(){
+    return track.scrollWidth - track.clientWidth > 2;
+  }
+
+  /* 更新箭頭：不需要滾動時隱藏，需要時常駐顯示（因為循環） */
+  function updateArrows(){
+    if(!canScroll()){
+      arrowL.classList.add('gc-hidden');
+      arrowR.classList.add('gc-hidden');
+    } else {
+      arrowL.classList.remove('gc-hidden');
+      arrowR.classList.remove('gc-hidden');
+    }
+  }
+
+  /* 右箭頭：到底 → 跳回開頭 */
+  arrowR.addEventListener('click', function(){
+    var maxScroll = track.scrollWidth - track.clientWidth;
+    if(track.scrollLeft >= maxScroll - 2){
+      track.scrollTo({ left: 0, behavior: 'smooth' });
+    } else {
+      track.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+    }
+  });
+
+  /* 左箭頭：在開頭 → 跳到最後 */
+  arrowL.addEventListener('click', function(){
+    if(track.scrollLeft <= 2){
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      track.scrollTo({ left: maxScroll, behavior: 'smooth' });
+    } else {
+      track.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+    }
+  });
+
+  window.addEventListener('resize', updateArrows);
+
+  var imgs = track.querySelectorAll('img');
+  imgs.forEach(function(img){
+    img.addEventListener('load', function(){
+      updateArrows();
+      reportHeight();
+    });
+  });
+
+  updateArrows();
+
+})();
+</script>
+
+</body>
+</html>
