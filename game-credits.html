@@ -12,6 +12,12 @@
 /* ===== RESET & BASE ===== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+:root {
+  --brown:     #3A2F2A;
+  --brown-mid: #6B5A4C;
+  --brown-lt:  #A0887A;
+}
+
 html, body {
   background: transparent;
   font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
@@ -155,9 +161,10 @@ body {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(58,47,42,0.35);
-  color: #FFFFFF;
-  border: none;
+  background: rgba(255,255,255,.85);
+  color: #3A2F2A;
+  border: 1px solid rgba(58,47,42,.15);
+  box-shadow: 0 2px 8px rgba(58,47,42,.10);
   font-size: 18px;
   cursor: pointer;
   z-index: 2;
@@ -168,6 +175,9 @@ body {
   line-height: 1;
   opacity: 0;
   transition: opacity 0.3s ease;
+}
+.gc-arrow:hover {
+  background: rgba(255,255,255,.95);
 }
 
 .gc-arrow-l { left: 6px; }
@@ -189,6 +199,101 @@ body {
 :root[data-lang="ja"] .lang-en { display: none !important; }
 :root[data-lang="en"] .lang-tw,
 :root[data-lang="en"] .lang-ja { display: none !important; }
+
+/* ===== EXTERNAL LINK MODAL（與 contact-cards 一致） ===== */
+.ext-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(58,47,42,.38);
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.ext-overlay.is-open { display: flex; }
+
+.ext-modal {
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(58,47,42,.14);
+  border-radius: 16px;
+  padding: 24px 22px 20px;
+  max-width: 300px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(58,47,42,.18);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.ext-modal-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.ext-modal-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
+.ext-modal-body {
+  font-size: 11.5px;
+  color: var(--brown-mid);
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+.ext-modal-url {
+  font-size: 10px;
+  color: var(--brown-lt);
+  letter-spacing: 0.02em;
+  word-break: break-all;
+  background: rgba(58,47,42,.05);
+  border-radius: 6px;
+  padding: 5px 10px;
+  width: 100%;
+}
+.ext-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.ext-modal-cancel {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(58,47,42,.22);
+  background: transparent;
+  color: var(--brown);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+}
+.ext-modal-cancel:hover { background: rgba(58,47,42,.06); }
+.ext-modal-go {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: none;
+  background: var(--brown);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .15s;
+}
+.ext-modal-go:hover { opacity: .82; }
 
 /* ===== MOBILE ===== */
 @media (max-width: 480px) {
@@ -224,7 +329,7 @@ body {
   <!--
   📌 新增遊戲：複製任一個 <a class="gc-card"> 區塊，
   修改 ① href ② img src ③ 三語名稱 ④ 好評率
--->
+  -->
 
   <div class="gc-slider">
 
@@ -237,7 +342,6 @@ body {
          href="https://store.steampowered.com/app/3053390/"
          target="_blank"
          rel="noopener noreferrer">
-        <!-- 📌 封面圖：替換 src 網址 -->
         <img class="gc-cover"
              src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-houseexploration-s01-616x353-v1.webp"
              alt="家屋探索 Japanese House Exploration">
@@ -260,7 +364,6 @@ body {
          href="https://store.steampowered.com/app/3344750/"
          target="_blank"
          rel="noopener noreferrer">
-        <!-- 📌 封面圖：替換 src 網址 -->
         <img class="gc-cover"
              src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-debugdead-s01-616x353-v1.webp"
              alt="Debug Deadline">
@@ -277,34 +380,43 @@ body {
           </span>
         </div>
       </a>
- <!-- 卡片 2：Debug Deadline -->
-      <a class="gc-card"
-         href="https://store.steampowered.com/app/3344750/"
-         target="_blank"
-         rel="noopener noreferrer">
-        <!-- 📌 封面圖：替換 src 網址 -->
-        <img class="gc-cover"
-             src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-debugdead-s01-616x353-v1.webp"
-             alt="Debug Deadline">
-        <div class="gc-info">
-          <p class="gc-name">
-            <span class="lang-tw">Debug Deadline</span>
-            <span class="lang-ja">Debug Deadline</span>
-            <span class="lang-en">Debug Deadline</span>
-          </p>
-          <span class="gc-badge">
-            <span class="lang-tw">Steam 好評率 91%</span>
-            <span class="lang-ja">Steam 高評価 91%</span>
-            <span class="lang-en">91% positive on Steam</span>
-          </span>
-        </div>
-      </a>
+
       <!-- 📌 新增更多遊戲請貼在這裡 -->
 
     </div>
 
     <button class="gc-arrow gc-arrow-r" aria-label="下一個">&#8250;</button>
 
+  </div>
+</div>
+
+<!-- External link confirmation modal（與 contact-cards 一致） -->
+<div class="ext-overlay" id="extOverlay" role="dialog" aria-modal="true">
+  <div class="ext-modal">
+    <div class="ext-modal-icon">🔗</div>
+    <div class="ext-modal-title">
+      <span class="lang-tw">即將離開本站</span>
+      <span class="lang-ja">外部リンクへ移動</span>
+      <span class="lang-en">Leaving this site</span>
+    </div>
+    <div class="ext-modal-body">
+      <span class="lang-tw">您將前往 Tsukiyomi Yana 以外的外部網頁。</span>
+      <span class="lang-ja">Tsukiyomi Yana のサイトを離れて外部リンクにアクセスします。</span>
+      <span class="lang-en">You're about to leave Tsukiyomi Yana's Website and visit an external link.</span>
+    </div>
+    <div class="ext-modal-url" id="extUrl"></div>
+    <div class="ext-modal-actions">
+      <button class="ext-modal-cancel" id="extCancel">
+        <span class="lang-tw">取消</span>
+        <span class="lang-ja">キャンセル</span>
+        <span class="lang-en">Cancel</span>
+      </button>
+      <a class="ext-modal-go" id="extGo" href="#" target="_blank" rel="noopener">
+        <span class="lang-tw">前往</span>
+        <span class="lang-ja">移動する</span>
+        <span class="lang-en">Continue</span>
+      </a>
+    </div>
   </div>
 </div>
 
@@ -319,10 +431,8 @@ body {
     setTimeout(reportHeight, 50);
   }
 
-  // 預設繁中
   setLang("tw");
 
-  // 接收來自 Carrd 頁面的語言訊息
   window.addEventListener("message", function(e){
     if(e.data && e.data.type === "set-lang"){
       setLang(e.data.lang);
@@ -370,13 +480,48 @@ body {
     try{ window.parent.postMessage({ type:"gc-height", height:h }, "*"); }catch(e){}
   }
 
-  // Only fire at safe explicit moments — never on resize/observe
   setTimeout(reportHeight, 0);
   setTimeout(reportHeight, 300);
   setTimeout(reportHeight, 800);
   setTimeout(reportHeight, 1500);
 
-  /* ===== 4. Slider ===== */
+  /* ===== 4. External link modal（與 contact-cards 一致） ===== */
+  var overlay   = document.getElementById("extOverlay");
+  var extUrlEl  = document.getElementById("extUrl");
+  var extGo     = document.getElementById("extGo");
+  var extCancel = document.getElementById("extCancel");
+
+  function openModal(href){
+    extUrlEl.textContent = href;
+    extGo.href = href;
+    overlay.classList.add("is-open");
+  }
+  function closeModal(){
+    overlay.classList.remove("is-open");
+    extGo.href = "#";
+    extUrlEl.textContent = "";
+  }
+
+  /* 攔截卡片點擊 → 顯示外部連結警告 */
+  document.addEventListener("click", function(e){
+    var card = e.target.closest(".gc-card");
+    if(!card) return;
+    var href = card.getAttribute("href");
+    if(!href || href === "#") return;
+    e.preventDefault();
+    openModal(href);
+  });
+
+  extCancel.addEventListener("click", closeModal);
+  extGo.addEventListener("click", function(){ setTimeout(closeModal, 80); });
+  overlay.addEventListener("click", function(e){
+    if(e.target === overlay) closeModal();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape") closeModal();
+  });
+
+  /* ===== 5. Slider（循環模式） ===== */
   var track  = document.querySelector('.gc-track');
   var arrowL = document.querySelector('.gc-arrow-l');
   var arrowR = document.querySelector('.gc-arrow-r');
@@ -389,27 +534,42 @@ body {
     return card.offsetWidth + 12;
   }
 
-  function updateArrows(){
-    var maxScroll = track.scrollWidth - track.clientWidth;
+  /* 判斷是否需要滾動（內容有沒有超出容器） */
+  function canScroll(){
+    return track.scrollWidth - track.clientWidth > 2;
+  }
 
-    if(maxScroll <= 2){
+  /* 更新箭頭：不需要滾動時隱藏，需要時常駐顯示（因為循環） */
+  function updateArrows(){
+    if(!canScroll()){
       arrowL.classList.add('gc-hidden');
       arrowR.classList.add('gc-hidden');
     } else {
-      arrowL.classList.toggle('gc-hidden', track.scrollLeft <= 2);
-      arrowR.classList.toggle('gc-hidden', track.scrollLeft >= maxScroll - 2);
+      arrowL.classList.remove('gc-hidden');
+      arrowR.classList.remove('gc-hidden');
     }
   }
 
-  arrowL.addEventListener('click', function(){
-    track.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
-  });
-
+  /* 右箭頭：到底 → 跳回開頭 */
   arrowR.addEventListener('click', function(){
-    track.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+    var maxScroll = track.scrollWidth - track.clientWidth;
+    if(track.scrollLeft >= maxScroll - 2){
+      track.scrollTo({ left: 0, behavior: 'smooth' });
+    } else {
+      track.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+    }
   });
 
-  track.addEventListener('scroll', updateArrows);
+  /* 左箭頭：在開頭 → 跳到最後 */
+  arrowL.addEventListener('click', function(){
+    if(track.scrollLeft <= 2){
+      var maxScroll = track.scrollWidth - track.clientWidth;
+      track.scrollTo({ left: maxScroll, behavior: 'smooth' });
+    } else {
+      track.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+    }
+  });
+
   window.addEventListener('resize', updateArrows);
 
   var imgs = track.querySelectorAll('img');
