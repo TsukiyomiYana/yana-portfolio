@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Carrd palette */
+  --bg:        #F5EDE8;
+  --brown:     #3A2F2A;
+  --brown-mid: #6B5A4C;
+  --brown-lt:  #A0887A;
+  --cream:     rgba(255,255,255,.82);
+
+  /* Suit accent colours — warm earth tones */
+  --spade:   #3A2F2A;          /* ♠ Discord  — deep brown */
+  --heart:   #B05A6A;          /* ♥ Email    — dusty rose */
+  --diamond: #C4894A;          /* ♦ Twitter  — warm amber */
+  --club:    #5A7A5E;          /* ♣ Booth    — sage green */
+}
+
+html, body {
+  background: transparent;
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  width: 100%;
+  /* FIX 1: overflow-x:hidden → clip — 不會破壞 3D 渲染環境 */
+  overflow-x: clip;
+}
+
+/* ===== WRAPPER ===== */
+.contact-wrap {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ===== HEADER LABEL ===== */
+.contact-label {
+  --label-fs: 15px;
+  --label-ls: 0.18em;
+  font-size: var(--label-fs);
+  font-weight: 700;
+  letter-spacing: var(--label-ls);
+  text-transform: uppercase;
+  color: var(--brown);
+  text-align: center;
+  user-select: none;
+}
+
+/* ===== CARD GRID ===== */
+/* FIX 2: 改用 CSS Grid — 手機上確保 2×2 排列不會變成一列 */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  gap: 14px;
+  justify-content: center;
+  justify-items: center;
+  /* FIX 3: 加 padding 讓 hover 浮起時不會被切掉 */
+  padding: 8px 4px;
+}
+
+/* ===== SINGLE CARD SCENE ===== */
+.card-scene {
+  /* poker card ratio ≈ 2.5 : 3.5 */
+  width: 143px;
+  height: 200px;
+  perspective: 800px;
+  /* FIX 4: 加 preserve-3d 確保 3D 環境向下傳遞 */
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.card-scene:hover,
+.card-scene.is-flipped {
+  z-index: 10;
+}
+
+/* hover lift */
+.card-scene:hover .card-inner {
+  transform: translateY(-4px);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.card-scene.is-flipped:hover .card-inner {
+  transform: rotateY(180deg) translateY(-4px);
+}
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  transition: transform .5s cubic-bezier(.4,0,.2,1);
+  /* FIX 5: will-change 提示瀏覽器提前準備 3D 合成 */
+  will-change: transform;
+}
+.card-scene.is-flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+/* ── Shared face ── */
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(58,47,42,.14);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  overflow: hidden;
+  box-shadow:
+    0 2px 8px rgba(58,47,42,.10),
+    0 1px 2px rgba(58,47,42,.08);
+}
+
+/* ── FRONT ── */
+.card-front {
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: relative;
+}
+
+/*
+ * FIX 6: backface-visibility 的 JS 備援方案
+ * 如果瀏覽器/iframe 不支援 backface-visibility，
+ * 用 visibility 來確保背面一定是隱藏的
+ */
+.card-back {
+  visibility: hidden;
+}
+.card-scene.is-flipped .card-back {
+  visibility: visible;
+}
+.card-scene.is-flipped .card-front {
+  visibility: hidden;
+}
+
+/* Corner index — top-left */
+.card-index {
+  position: absolute;
+  top: 6px;
+  left: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1;
+  z-index: 2;
+}
+.card-index-num {
+  font-family: "IM Fell English", Georgia, serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--suit-color, var(--brown));
+  line-height: 1;
+}
+.card-index-suit {
+  font-size: 10px;
+  color: var(--suit-color, var(--brown));
+  line-height: 1;
+  margin-top: 1px;
+}
+
+/* Corner index — bottom-right (rotated) */
+.card-index-br {
+  position: absolute;
+  bottom: 24px;
+  right: 7px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform: rotate(180deg);
+  line-height: 1;
+  z-index: 2;
+}
+
+/* Character image — left/right white border, equal top/bottom spacing */
+.card-art {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  margin: 12px 8px 30px 8px;
+}
+.card-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  border-radius: 4px;
+}
+
+/* Strip — absolute, flush to card bottom, full width */
+.card-name-strip {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--suit-color, var(--brown));
+  color: #fff;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 4px 4px;
+  opacity: 0.92;
+  z-index: 2;
+  border-radius: 0 0 9px 9px;
+}
+
+/* ── BACK ── */
+.card-back {
+  background: var(--suit-color, var(--brown));
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0 0 0 0;
+}
+
+/* Back: suit colour header */
+.card-back-header {
+  background: transparent;
+  padding: 7px 8px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.back-suit-icon {
+  font-size: 15px;
+  color: rgba(255,255,255,.90);
+  line-height: 1;
+}
+.back-platform-name {
+  --bpn-fs: 9px;
+  font-size: var(--bpn-fs);
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.72);
+  line-height: 1;
+}
+
+/* Back: contact body */
+.card-back-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: var(--cream);
+  margin: 0 6px 6px 6px;
+  border-radius: 6px;
+}
+
+.back-value {
+  --bv-fs: 12px;
+  --bv-ls: 0.04em;
+  font-size: var(--bv-fs);
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: var(--bv-ls);
+  color: var(--brown);
+  text-align: center;
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+/* action buttons */
+.back-actions {
+  display: flex;
+  gap: 5px;
+}
+.back-btn {
+  --bb-fs: 7.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-decoration: none;
+  font-size: var(--bb-fs);
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 4px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(58,47,42,.22);
+  background: transparent;
+  color: var(--brown);
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.back-btn:hover, .back-btn:active {
+  background: var(--suit-color, var(--brown));
+  color: #fff;
+  border-color: transparent;
+}
+.back-btn.copied {
+  background: var(--suit-color, var(--brown));
+  color: #fff;
+  border-color: transparent;
+}
+
+/* ── Back: decorative corner suit ── */
+.back-corner {
+  font-size: 12px;
+  color: rgba(255,255,255,.72);
+  line-height: 1;
+  text-align: center;
+  padding: 4px 4px 6px;
+  letter-spacing: 4px;
+}
+
+/* ===== PER-SUIT VARIABLES ===== */
+.card--spade   { --suit-color: var(--spade);   }
+.card--heart   { --suit-color: var(--heart);   }
+.card--diamond { --suit-color: var(--diamond); }
+.card--club    { --suit-color: var(--club);    }
+
+/* ===== HINT BELOW ===== */
+.contact-hint {
+  --hint-fs: 11px;
+  --hint-ls: 0.07em;
+  font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+  font-size: var(--hint-fs);
+  letter-spacing: var(--hint-ls);
+  font-weight: 400;
+  line-height: 1.65;
+  color: #7A6A5A;
+  opacity: 0.95;
+  text-align: center;
+  user-select: none;
+  margin-top: 10px;
+}
+
+/* ===== EXTERNAL LINK MODAL ===== */
+.ext-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(58,47,42,.38);
+  backdrop-filter: blur(3px);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.ext-overlay.is-open { display: flex; }
+
+.ext-modal {
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(58,47,42,.14);
+  border-radius: 16px;
+  padding: 24px 22px 20px;
+  max-width: 340px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(58,47,42,.18);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.ext-modal-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+.ext-modal-title {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brown);
+}
+.ext-modal-body {
+  font-size: 11.5px;
+  color: var(--brown-mid);
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+}
+.ext-modal-url {
+  font-size: 10px;
+  color: var(--brown-lt);
+  letter-spacing: 0.02em;
+  word-break: break-all;
+  background: rgba(58,47,42,.05);
+  border-radius: 6px;
+  padding: 5px 10px;
+  width: 100%;
+}
+.ext-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.ext-modal-cancel {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(58,47,42,.22);
+  background: transparent;
+  color: var(--brown);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s;
+  white-space: nowrap;
+}
+.ext-modal-cancel:hover { background: rgba(58,47,42,.06); }
+.ext-modal-go {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: none;
+  background: var(--brown);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .15s;
+}
+.ext-modal-go:hover { opacity: .82; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 480px) {
+  .card-scene { width: 122px; height: 171px; }
+  .card-index-num { font-size: 13px; }
+  .card-art { margin-top: 12px; }
+  .back-value { line-height: 1.4; }
+  .back-btn { padding: 3px 6px; }
+  /* FIX 7: 手機強制 2 欄、不會變成 1 欄 */
+  .cards-grid {
+    grid-template-columns: repeat(2, auto);
+    gap: 10px;
+  }
+}
+
+/* 非常窄的螢幕（< 300px）才縮到 1 欄 */
+@media (max-width: 299px) {
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+  .card-scene { width: 130px; height: 182px; }
+}
+</style>
+</head>
+<body>
+
+<div class="contact-wrap" id="contactRoot">
+
+  <div class="cards-grid">
+
+    <!-- ♠ SPADE — Discord -->
+    <div class="card-scene card--spade" data-card="spade" role="button" tabindex="0" aria-label="Discord card">
+      <div class="card-inner">
+        <div class="card-face card-front">
+          <div class="card-index">
+            <span class="card-index-num">A</span>
+            <span class="card-index-suit">♠</span>
+          </div>
+          <div class="card-index-br">
+            <span class="card-index-num">A</span>
+            <span class="card-index-suit">♠</span>
+          </div>
+          <div class="card-art">
+            <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Yana">
+          </div>
+          <div class="card-name-strip">Discord</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-back-header">
+            <span class="back-suit-icon">♠</span>
+            <span class="back-platform-name">Discord</span>
+          </div>
+          <div class="card-back-body">
+            <div class="back-value">tsukiyomi_yana</div>
+            <div class="back-actions">
+              <button class="back-btn" data-copy="tsukiyomi_yana">Copy</button>
+            </div>
+          </div>
+          <div class="back-corner">♠ ♠ ♠</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ♥ HEART — Email -->
+    <div class="card-scene card--heart" data-card="heart" role="button" tabindex="0" aria-label="Email card">
+      <div class="card-inner">
+        <div class="card-face card-front">
+          <div class="card-index">
+            <span class="card-index-num">A</span>
+            <span class="card-index-suit">♥</span>
+          </div>
+          <div class="card-index-br">
+            <span class="card-index-num">A</span>
+            <span class="card-index-suit">♥</span>
+          </div>
+          <div class="card-art">
+            <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu">
+          </div>
+          <div class="card-name-strip">Email</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-back-header">
+            <span class="back-suit-icon">♥</span>
+            <span class="back-platform-name">Email</span>
+          </div>
+          <div class="card-back-body">
+            <div class="back-value">tsukiyomiyana<br>@gmail.com</div>
+            <div class="back-actions">
+              <button class="back-btn" data-copy="tsukiyomiyana@gmail.com">Copy</button>
+            </div>
+          </div>
+          <div class="back-corner">♥ ♥ ♥</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ♦ DIAMOND — Twitter / X -->
+    <div class="card-scene card--diamond" data-card="diamond" role="button" tabindex="0" aria-label="Twitter card">
+      <div class="card-inner">
+        <div class="card-face card-front">
+          <div class="card-index">
+            <span class="card-index-num">A</span>
+            <span class="card-index-suit">♦</span>
+          </div>
+          <div class="card-index-br">
+            <span class="card-index-num">A</span>
+            <span class="card-index-suit">♦</span>
+          </div>
+          <div class="card-art">
+            <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-yanaid-s01-962x1200-v1.webp" alt="Yana">
+          </div>
+          <div class="card-name-strip">X / Twitter</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-back-header">
+            <span class="back-suit-icon">♦</span>
+            <span class="back-platform-name">X / Twitter</span>
+          </div>
+          <div class="card-back-body">
+            <div class="back-value">@LinMarns</div>
+            <div class="back-actions">
+              <a class="back-btn" href="https://x.com/LinMarns" target="_blank" rel="noopener">Open</a>
+            </div>
+          </div>
+          <div class="back-corner">♦ ♦ ♦</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ♣ CLUB — Booth -->
+    <div class="card-scene card--club" data-card="club" role="button" tabindex="0" aria-label="Booth card">
+      <div class="card-inner">
+        <div class="card-face card-front">
+          <div class="card-index">
+            <span class="card-index-num">A</span>
+            <span class="card-index-suit">♣</span>
+          </div>
+          <div class="card-index-br">
+            <span class="card-index-num">A</span>
+            <span class="card-index-suit">♣</span>
+          </div>
+          <div class="card-art">
+            <img src="https://cdn.jsdelivr.net/gh/TsukiyomiYana/yana-portfolio-assets@master/thumbs/web-anuid-s01-962x1200-v1.webp" alt="Anu">
+          </div>
+          <div class="card-name-strip">BOOTH</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-back-header">
+            <span class="back-suit-icon">♣</span>
+            <span class="back-platform-name">BOOTH</span>
+          </div>
+          <div class="card-back-body">
+            <div class="back-value">marns.booth.pm</div>
+            <div class="back-actions">
+              <a class="back-btn" href="https://marns.booth.pm/" target="_blank" rel="noopener">Open</a>
+            </div>
+          </div>
+          <div class="back-corner">♣ ♣ ♣</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /cards-grid -->
+
+  <div class="contact-hint">
+    <span class="lang-tw">點擊各個卡牌來查看聯絡我的方式</span>
+    <span class="lang-ja">カードをクリックして連絡方法を見よう</span>
+    <span class="lang-en">Click each card to see how to contact me</span>
+  </div>
+
+</div>
+
+<!-- External link confirmation modal -->
+<div class="ext-overlay" id="extOverlay" role="dialog" aria-modal="true">
+  <div class="ext-modal">
+    <div class="ext-modal-icon">🔗</div>
+    <div class="ext-modal-title">
+      <span class="lang-tw">即將離開本站</span>
+      <span class="lang-ja">外部リンクへ移動</span>
+      <span class="lang-en">Leaving this site</span>
+    </div>
+    <div class="ext-modal-body">
+      <span class="lang-tw">您將前往 Tsukiyomi Yana 以外的外部網頁。</span>
+      <span class="lang-ja">Tsukiyomi Yana のサイトを離れて外部リンクにアクセスします。</span>
+      <span class="lang-en">You're about to leave Tsukiyomi Yana's Website and visit an external link.</span>
+    </div>
+    <div class="ext-modal-url" id="extUrl"></div>
+    <div class="ext-modal-actions">
+      <button class="ext-modal-cancel" id="extCancel">
+        <span class="lang-tw">取消</span>
+        <span class="lang-ja">キャンセル</span>
+        <span class="lang-en">Cancel</span>
+      </button>
+      <a class="ext-modal-go" id="extGo" href="#" target="_blank" rel="noopener">
+        <span class="lang-tw">前往</span>
+        <span class="lang-ja">移動する</span>
+        <span class="lang-en">Continue</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+
+  /* ===== Language ===== */
+  function setLang(lang){
+    if(lang!=="tw"&&lang!=="ja"&&lang!=="en") lang="tw";
+    document.documentElement.setAttribute("data-lang", lang);
+  }
+  setLang("tw");
+  window.addEventListener("message", function(e){
+    if(e.data && e.data.type==="set-lang") setLang(e.data.lang);
+  });
+  var langStyle = document.createElement("style");
+  langStyle.textContent =
+    ':root[data-lang="tw"] .lang-ja,:root[data-lang="tw"] .lang-en{display:none!important}' +
+    ':root[data-lang="ja"] .lang-tw,:root[data-lang="ja"] .lang-en{display:none!important}' +
+    ':root[data-lang="en"] .lang-tw,:root[data-lang="en"] .lang-ja{display:none!important}';
+  document.head.appendChild(langStyle);
+
+  /* ===== Flip ===== */
+  document.querySelectorAll(".card-scene").forEach(function(scene){
+    scene.addEventListener("click", function(e){
+      if(e.target.closest(".back-btn")) return;
+      scene.classList.toggle("is-flipped");
+    });
+    scene.addEventListener("keydown", function(e){
+      if(e.key==="Enter"||e.key===" "){
+        e.preventDefault();
+        scene.classList.toggle("is-flipped");
+      }
+    });
+  });
+
+  /* ===== Copy (iframe-safe) ===== */
+  function writeClip(text){
+    if(navigator.clipboard && window.isSecureContext){
+      return navigator.clipboard.writeText(text);
+    }
+    return new Promise(function(resolve, reject){
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.cssText = "position:fixed;left:-9999px;top:-9999px;opacity:0";
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      ok ? resolve() : reject(new Error("copy failed"));
+    });
+  }
+
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest(".back-btn[data-copy]");
+    if(!btn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var text = btn.getAttribute("data-copy");
+    if(!text) return;
+    writeClip(text).then(function(){
+      var prev = btn.textContent;
+      btn.textContent = "✔"; btn.classList.add("copied");
+      clearTimeout(btn._t);
+      btn._t = setTimeout(function(){
+        btn.textContent = prev; btn.classList.remove("copied");
+      }, 1000);
+    }).catch(function(){
+      btn.textContent = "!"; btn.style.opacity=".5";
+      setTimeout(function(){ btn.textContent="Copy"; btn.style.opacity=""; }, 1500);
+    });
+  });
+
+  /* ===== External link modal ===== */
+  var overlay   = document.getElementById("extOverlay");
+  var extUrlEl  = document.getElementById("extUrl");
+  var extGo     = document.getElementById("extGo");
+  var extCancel = document.getElementById("extCancel");
+
+  function openModal(href){
+    extUrlEl.textContent = href;
+    extGo.href = href;
+    overlay.classList.add("is-open");
+  }
+  function closeModal(){
+    overlay.classList.remove("is-open");
+    extGo.href = "#";
+    extUrlEl.textContent = "";
+  }
+
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest(".back-btn:not([data-copy])");
+    if(!btn) return;
+    var href = btn.getAttribute("href");
+    if(!href || href==="#") return;
+    e.preventDefault();
+    e.stopPropagation();
+    openModal(href);
+  });
+
+  extCancel.addEventListener("click", closeModal);
+  extGo.addEventListener("click", function(){ setTimeout(closeModal, 80); });
+  overlay.addEventListener("click", function(e){
+    if(e.target === overlay) closeModal();
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key==="Escape") closeModal();
+  });
+
+  /* ===== Height report ===== */
+  var _lastH = 0;
+  function reportHeight(){
+    var el = document.getElementById("contactRoot");
+    if(!el) return;
+    var h = Math.ceil(el.getBoundingClientRect().height) + 24;
+    if(h === _lastH) return;
+    _lastH = h;
+    try{ window.parent.postMessage({type:"contactcard-height", height:h}, "*"); }catch(_){}
+  }
+
+  [0, 300, 800, 1500].forEach(function(ms){ setTimeout(reportHeight, ms); });
+
+  if(window.ResizeObserver){
+    var ro = new ResizeObserver(function(){
+      requestAnimationFrame(reportHeight);
+    });
+    ro.observe(document.getElementById("contactRoot"));
+  } else {
+    window.addEventListener("resize", reportHeight);
+  }
+
+  /* ===== Fluid text scaling ===== */
+  (function(){
+    var CFG = {
+      minW: 260, maxW: 520,
+      label: { minFS: 13, maxFS: 15 },
+      bpn:   { minFS: 8.5, maxFS: 9 },
+      bv:    { minFS: 11, maxFS: 12, minLS: 0.02, maxLS: 0.04 },
+      bb:    { minFS: 6.5, maxFS: 8 },
+      hint:  { minFS: 9, maxFS: 11, minLS: 0.05, maxLS: 0.09 }
+    };
+
+    function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+    function applyScale(root){
+      var w = root.getBoundingClientRect().width;
+      var t = clamp((w - CFG.minW) / (CFG.maxW - CFG.minW), 0, 1);
+
+      function lerp(a,b){ return (a + (b-a)*t).toFixed(2); }
+      function lerpEm(a,b){ return (a + (b-a)*t).toFixed(3); }
+
+      root.querySelectorAll(".contact-label").forEach(function(el){
+        el.style.setProperty("--label-fs", lerp(CFG.label.minFS, CFG.label.maxFS)+"px");
+      });
+      root.querySelectorAll(".back-platform-name").forEach(function(el){
+        el.style.setProperty("--bpn-fs", lerp(CFG.bpn.minFS, CFG.bpn.maxFS)+"px");
+      });
+      root.querySelectorAll(".back-value").forEach(function(el){
+        el.style.setProperty("--bv-fs", lerp(CFG.bv.minFS, CFG.bv.maxFS)+"px");
+        el.style.setProperty("--bv-ls", lerpEm(CFG.bv.minLS, CFG.bv.maxLS)+"em");
+      });
+      root.querySelectorAll(".back-btn").forEach(function(el){
+        el.style.setProperty("--bb-fs", lerp(CFG.bb.minFS, CFG.bb.maxFS)+"px");
+      });
+      var hint = root.querySelector(".contact-hint");
+      if(hint){
+        hint.style.setProperty("--hint-fs", lerp(CFG.hint.minFS, CFG.hint.maxFS)+"px");
+        hint.style.setProperty("--hint-ls", lerpEm(CFG.hint.minLS, CFG.hint.maxLS)+"em");
+      }
+    }
+
+    var root = document.getElementById("contactRoot");
+    if(!root) return;
+
+    var raf = 0;
+    function onResize(){
+      if(raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(function(){ applyScale(root); });
+    }
+
+    applyScale(root);
+    if(window.ResizeObserver){
+      new ResizeObserver(onResize).observe(root);
+    } else {
+      window.addEventListener("resize", onResize);
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
